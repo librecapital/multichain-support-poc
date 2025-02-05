@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useEvmWallet } from '@/hooks/use-evm-wallet';
+import { useSolanaWallet } from "@/hooks/use-solana-wallet";
 import { Send, Wallet } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
@@ -30,22 +31,35 @@ export default function Home() {
   } = useEvmWallet();
 
   const {
+    isSolanaLoading, solanaBalance, solanaAddress, isSolanaConnected,
+    handleSolanaPay, connectSolana, disconnectSolana
+  } = useSolanaWallet();
+
+  const {
     isConnected, handleConnect, handleDisconnect, address, balance, handlePay
   } = useMemo(() => {
     switch (selectedChain) {
       case "ethereum": return {
-        isConnected: isEvmConnected,
-        address: evmAddress,
-        balance: evmBalance,
         handlePay: () => handleEvmPay(),
+        balance: evmBalance,
+        address: evmAddress,
+        isConnected: isEvmConnected,
         handleConnect: () => openEvmModal(),
         handleDisconnect: disconnectEvm,
+      };
+      case "solana": return {
+        handlePay: () => handleSolanaPay(),
+        balance: solanaBalance,
+        address: solanaAddress,
+        isConnected: isSolanaConnected,
+        handleConnect: connectSolana,
+        handleDisconnect: disconnectSolana
       };
       default: return {};
     }
   }, [
-    isEvmLoading, evmBalance, evmAddress, isEvmConnected,
-    handleEvmPay, openEvmModal, disconnectEvm
+    isEvmLoading, evmBalance, evmAddress, isEvmConnected, handleEvmPay, openEvmModal, disconnectEvm,
+    isSolanaLoading, solanaBalance, solanaAddress, isSolanaConnected, handleSolanaPay, connectSolana, disconnectSolana
   ]);
 
   return (

@@ -26,7 +26,7 @@ const USDC_ABI = [
     }
 ];
 
-// USDC contract addresses on different networks
+// USDC contract addresses
 const USDC_ADDRESS = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
 
 const getContract = async (walletProvider: ethers.Eip1193Provider) => {
@@ -68,7 +68,7 @@ export const useEvmWallet = () => {
         try {
             setIsEvmLoading(true);
 
-            const parsedValue = parseUnits("10", 6);
+            const parsedValue = parseUnits("0", 6);
             const contract = await getContract(walletProvider);
 
             const tx = await contract.transfer(evmAddress, parsedValue);
