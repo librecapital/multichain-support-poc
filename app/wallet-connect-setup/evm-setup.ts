@@ -20,7 +20,14 @@ const evmChains = [
         currency: "ETH",
         explorerUrl: "https://etherscan.io",
         rpcUrl: "https://cloudflare-eth.com",
-    }
+    },
+    {
+        chainId: 137,
+        name: "Polygon",
+        currency: "MATIC",
+        explorerUrl: "https://polygonscan.com",
+        rpcUrl: "https://polygon-rpc.com"
+      }
 ];
 
 // Create EVM configuration

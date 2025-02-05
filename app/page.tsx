@@ -27,7 +27,7 @@ export default function Home() {
   // TODO: 3. Submit transaction signing with the wallet
   const {
     isEvmLoading, evmBalance, evmAddress, isEvmConnected,
-    openEvmModal, handleEvmPay, disconnectEvm
+    open, handleEvmPay, disconnectEvm
   } = useEvmWallet();
 
   const {
@@ -44,7 +44,15 @@ export default function Home() {
         balance: evmBalance,
         address: evmAddress,
         isConnected: isEvmConnected,
-        handleConnect: () => openEvmModal(),
+        handleConnect: () => open(1),
+        handleDisconnect: disconnectEvm,
+      };
+      case "polygon": return {
+        handlePay: () => handleEvmPay(),
+        balance: evmBalance,
+        address: evmAddress,
+        isConnected: isEvmConnected,
+        handleConnect: () => open(137),
         handleDisconnect: disconnectEvm,
       };
       case "solana": return {
@@ -58,7 +66,7 @@ export default function Home() {
       default: return {};
     }
   }, [
-    isEvmLoading, evmBalance, evmAddress, isEvmConnected, handleEvmPay, openEvmModal, disconnectEvm,
+    isEvmLoading, evmBalance, evmAddress, isEvmConnected, handleEvmPay, open, disconnectEvm,
     isSolanaLoading, solanaBalance, solanaAddress, isSolanaConnected, handleSolanaPay, connectSolana, disconnectSolana
   ]);
 
