@@ -23,7 +23,6 @@
     "@types/react": "19.0.8",
     "@types/react-dom": "19.0.3",
     "@web3modal/ethers": "4.1.1",
-    "@web3modal/ui": "5.1.11",
     "aptos": "1.21.0",
     "autoprefixer": "10.4.15",
     "class-variance-authority": "^0.7.0",
