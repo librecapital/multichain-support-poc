@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from 'react';
-// import { useWeb3Modal } from '@web3modal/wagmi';
-import { useAccount, useBalance } from 'wagmi';
+import "@/app/wallet-connect-setup/evm-setup";
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Wallet, Send } from 'lucide-react';
+import { useEvmWallet } from '@/hooks/use-evm-wallet';
+import { Send, Wallet } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 const chains = [
   { id: 'ethereum', name: 'Ethereum/IMX' },
@@ -21,37 +21,39 @@ const chains = [
 
 export default function Home() {
   const [selectedChain, setSelectedChain] = useState('ethereum');
-  // const { open } = useWeb3Modal();
-  const { address, isConnected } = useAccount();
-  const { data: balance } = useBalance({
-    address,
-    token: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48' // USDC contract address
-  });
-
   // TODO: 1. Connect wallet
   // TODO: 2. Show USDC balance (or any other token)
   // TODO: 3. Submit transaction signing with the wallet
+  const {
+    isEvmLoading, evmBalance, evmAddress, isEvmConnected,
+    openEvmModal, handleEvmPay, disconnectEvm
+  } = useEvmWallet();
 
-  const handleConnect = async () => {
-    if (selectedChain === 'ethereum' || selectedChain === 'polygon') {
-      // open();
-    } else {
-      // Implement other chain connections
-      console.log('Connecting to', selectedChain);
+  const {
+    isConnected, handleConnect, handleDisconnect, address, balance, handlePay
+  } = useMemo(() => {
+    switch (selectedChain) {
+      case "ethereum": return {
+        isConnected: isEvmConnected,
+        address: evmAddress,
+        balance: evmBalance,
+        handlePay: () => handleEvmPay(),
+        handleConnect: () => openEvmModal(),
+        handleDisconnect: disconnectEvm,
+      };
+      default: return {};
     }
-  };
-
-  const handleTransaction = async () => {
-    // Implement transaction logic based on selected chain
-    console.log('Sending transaction on', selectedChain);
-  };
+  }, [
+    isEvmLoading, evmBalance, evmAddress, isEvmConnected,
+    handleEvmPay, openEvmModal, disconnectEvm
+  ]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-4xl font-bold text-center mb-8">Multi-Chain Wallet</h1>
-          
+
           <Card className="bg-gray-800 border-gray-700 p-6 mb-6">
             <div className="space-y-4">
               <div className="flex items-center space-x-4">
@@ -87,16 +89,23 @@ export default function Home() {
                   <div className="bg-gray-700 rounded-lg p-4">
                     <p className="text-sm text-gray-300">USDC Balance</p>
                     <p className="text-xl font-bold">
-                      {balance ? balance.formatted : '0.00'} USDC
+                      {balance} USDC
                     </p>
                   </div>
 
                   <Button
-                    onClick={handleTransaction}
+                    onClick={handlePay}
                     className="w-full bg-green-600 hover:bg-green-700"
                   >
                     <Send className="mr-2 h-4 w-4" />
                     Send Transaction
+                  </Button>
+
+                  <Button
+                    onClick={handleDisconnect}
+                    className="w-full bg-green-600 hover:bg-green-700"
+                  >
+                    Disconnext
                   </Button>
                 </div>
               )}
