@@ -7,24 +7,33 @@ export const useKeplrWallet = () => {
     const [keplrAddress, setKeplrAddress] = useState<string | null>(null);
     const [keplrBalance, setKeplrBalance] = useState<number | null>(null);
     const [isKeplrLoading, setIsKeplrLoading] = useState(false);
-    const [keplrToken, setKeplrToken] = useState("uom");
-
-    const isKeplrConnected = !!keplrAddress;
+    const [keplrToken, setKeplrToken] = useState<string | null>(null);
+    const [isKeplrConnected, setIsKeplrConnected] = useState<boolean>(false);
 
     const connectKeplr = async (chain: string, rpc: string, token: string) => {
-        setKeplrManager(await KeplrManager.create(chain, rpc));
-        const address = await keplrManager?.connectWallet() ?? null;
+        const km = await KeplrManager.create(chain, rpc);
+        const address = await km?.connectWallet();
+        if (!address) {
+            throw Error("No address found");
+        }
+        setKeplrManager(km);
         setKeplrAddress(address);
         setKeplrToken(token);
+        setIsKeplrConnected(true);
     };
 
     const disconnectKeplr = async () => {
         await keplrManager?.disconnectWallet();
         setKeplrAddress(null);
+        setKeplrManager(null);
+        setKeplrBalance(null);
+        setIsKeplrLoading(false);
+        setKeplrToken(null);
+        setIsKeplrConnected(false);
     };
 
     useEffect(() => {
-        if (!isKeplrConnected || !keplrAddress || !keplrManager) return;
+        if (!isKeplrConnected || !keplrAddress || !keplrManager || !keplrToken) return;
 
         const handleGetBalance = async () => {
             const balance = await keplrManager.getBalance(keplrAddress, keplrToken);
@@ -33,10 +42,10 @@ export const useKeplrWallet = () => {
 
         handleGetBalance();
 
-    }, [isKeplrConnected, keplrManager, keplrAddress]);
+    }, [isKeplrConnected, keplrManager, keplrAddress, keplrToken]);
 
     const handleKeplrPay = async (): Promise<string | undefined> => {
-        if (!keplrAddress) return;
+        if (!keplrAddress || !keplrToken) return;
 
         setIsKeplrLoading(true);
 

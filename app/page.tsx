@@ -81,6 +81,15 @@ export default function Home() {
         handleDisconnect: disconnectKeplr,
         tokenName: keplrToken
       };
+      case "injective": return {
+        handlePay: () => handleKeplrPay(),
+        balance: keplrBalance,
+        address: keplrAddress,
+        isConnected: isKeplrConnected,
+        handleConnect: () => connectKeplr("injective-888", "https://testnet.sentry.tm.injective.network:443", "inj"),
+        handleDisconnect: disconnectKeplr,
+        tokenName: keplrToken
+      };
       default: return {};
     }
   }, [
