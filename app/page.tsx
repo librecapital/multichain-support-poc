@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useEvmWallet } from '@/hooks/use-evm-wallet';
+import { useKeplrWallet } from "@/hooks/use-keplr-wallet";
 import { useSolanaWallet } from "@/hooks/use-solana-wallet";
 import { Send, Wallet } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -36,7 +37,12 @@ export default function Home() {
   } = useSolanaWallet();
 
   const {
-    isConnected, handleConnect, handleDisconnect, address, balance, handlePay
+    isKeplrLoading, keplrBalance, keplrAddress, isKeplrConnected,
+    handleKeplrPay, connectKeplr, disconnectKeplr, keplrToken
+  } = useKeplrWallet();
+
+  const {
+    isConnected, handleConnect, handleDisconnect, address, balance, handlePay, tokenName
   } = useMemo(() => {
     switch (selectedChain) {
       case "ethereum": return {
@@ -46,6 +52,7 @@ export default function Home() {
         isConnected: isEvmConnected,
         handleConnect: () => open(1),
         handleDisconnect: disconnectEvm,
+        tokenName: "USDC"
       };
       case "polygon": return {
         handlePay: () => handleEvmPay(),
@@ -54,6 +61,7 @@ export default function Home() {
         isConnected: isEvmConnected,
         handleConnect: () => open(137),
         handleDisconnect: disconnectEvm,
+        tokenName: "USDC"
       };
       case "solana": return {
         handlePay: () => handleSolanaPay(),
@@ -61,14 +69,32 @@ export default function Home() {
         address: solanaAddress,
         isConnected: isSolanaConnected,
         handleConnect: connectSolana,
-        handleDisconnect: disconnectSolana
+        handleDisconnect: disconnectSolana,
+        tokenName: "USDC"
+      };
+      case "mantra": return {
+        handlePay: () => handleKeplrPay(),
+        balance: keplrBalance,
+        address: keplrAddress,
+        isConnected: isKeplrConnected,
+        handleConnect: () => connectKeplr("mantra-dukong-1", "https://rpc.dukong.mantrachain.io", "uom"),
+        handleDisconnect: disconnectKeplr,
+        tokenName: keplrToken
       };
       default: return {};
     }
   }, [
     isEvmLoading, evmBalance, evmAddress, isEvmConnected, handleEvmPay, open, disconnectEvm,
-    isSolanaLoading, solanaBalance, solanaAddress, isSolanaConnected, handleSolanaPay, connectSolana, disconnectSolana
+    isSolanaLoading, solanaBalance, solanaAddress, isSolanaConnected, handleSolanaPay, connectSolana, disconnectSolana,
+    isKeplrLoading, keplrBalance, keplrAddress, isKeplrConnected, handleKeplrPay, connectKeplr, disconnectKeplr
   ]);
+
+  const handleChainChange = async (newChain: string) => {
+    if (handleDisconnect) {
+      await handleDisconnect();
+    }
+    setSelectedChain(newChain);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
@@ -79,7 +105,7 @@ export default function Home() {
           <Card className="bg-gray-800 border-gray-700 p-6 mb-6">
             <div className="space-y-4">
               <div className="flex items-center space-x-4">
-                <Select value={selectedChain} onValueChange={setSelectedChain}>
+                <Select value={selectedChain} onValueChange={handleChainChange}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select Chain" />
                   </SelectTrigger>
@@ -109,9 +135,9 @@ export default function Home() {
                   </div>
 
                   <div className="bg-gray-700 rounded-lg p-4">
-                    <p className="text-sm text-gray-300">USDC Balance</p>
+                    <p className="text-sm text-gray-300">{tokenName} Balance</p>
                     <p className="text-xl font-bold">
-                      {balance} USDC
+                      {balance} {tokenName}
                     </p>
                   </div>
 

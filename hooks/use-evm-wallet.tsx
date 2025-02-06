@@ -73,7 +73,7 @@ export const useEvmWallet = () => {
         try {
             setIsEvmLoading(true);
             await switchNetwork(chain);
-            const parsedValue = parseUnits("10", 6);
+            const parsedValue = parseUnits("0", 6);
             const contract = await getContract(walletProvider, chain);
 
             const tx = await contract.transfer(evmAddress, parsedValue);
