@@ -65,6 +65,7 @@ export const useKeplrWallet = () => {
     };
 
     return {
+        keplrManager,
         isKeplrLoading,
         keplrBalance,
         keplrAddress,

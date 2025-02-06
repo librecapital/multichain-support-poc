@@ -93,6 +93,7 @@ export const useEvmWallet = () => {
     }
 
     return {
+        walletProvider,
         evmAddress,
         evmBalance,
         isEvmLoading,

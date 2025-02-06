@@ -32,7 +32,7 @@ export default function Home() {
   } = useEvmWallet();
 
   const {
-    isSolanaLoading, solanaBalance, solanaAddress, isSolanaConnected,
+    isSolanaLoading, solanaBalance, solanaAddress, isSolanaConnected, solanaManager,
     handleSolanaPay, connectSolana, disconnectSolana
   } = useSolanaWallet();
 
@@ -42,7 +42,7 @@ export default function Home() {
   } = useKeplrWallet();
 
   const {
-    isConnected, handleConnect, handleDisconnect, address, balance, handlePay, tokenName
+    isConnected, handleConnect, handleDisconnect, address, balance, handlePay, tokenName, isWalletInstalled, downloadWalletLink,
   } = useMemo(() => {
     switch (selectedChain) {
       case "ethereum": return {
@@ -52,7 +52,9 @@ export default function Home() {
         isConnected: isEvmConnected,
         handleConnect: () => open(1),
         handleDisconnect: disconnectEvm,
-        tokenName: "USDC"
+        tokenName: "USDC",
+        isWalletInstalled: !!global?.window?.ethereum,
+        downloadWalletLink: "https://metamask.io/",
       };
       case "polygon": return {
         handlePay: () => handleEvmPay(),
@@ -61,7 +63,9 @@ export default function Home() {
         isConnected: isEvmConnected,
         handleConnect: () => open(137),
         handleDisconnect: disconnectEvm,
-        tokenName: "USDC"
+        tokenName: "USDC",
+        isWalletInstalled: !!global?.window?.ethereum,
+        downloadWalletLink: "https://metamask.io/",
       };
       case "solana": return {
         handlePay: () => handleSolanaPay(),
@@ -70,7 +74,9 @@ export default function Home() {
         isConnected: isSolanaConnected,
         handleConnect: connectSolana,
         handleDisconnect: disconnectSolana,
-        tokenName: "USDC"
+        tokenName: "USDC",
+        isWalletInstalled: !!solanaManager,
+        downloadWalletLink: "https://www.phantom.com/",
       };
       case "mantra": return {
         handlePay: () => handleKeplrPay(),
@@ -79,7 +85,9 @@ export default function Home() {
         isConnected: isKeplrConnected,
         handleConnect: () => connectKeplr("mantra-dukong-1", "https://rpc.dukong.mantrachain.io", "uom"),
         handleDisconnect: disconnectKeplr,
-        tokenName: keplrToken
+        tokenName: keplrToken,
+        isWalletInstalled: !!(global?.window as any)?.keplr,
+        downloadWalletLink: "https://www.keplr.app/get",
       };
       case "injective": return {
         handlePay: () => handleKeplrPay(),
@@ -88,14 +96,34 @@ export default function Home() {
         isConnected: isKeplrConnected,
         handleConnect: () => connectKeplr("injective-888", "https://testnet.sentry.tm.injective.network:443", "inj"),
         handleDisconnect: disconnectKeplr,
-        tokenName: keplrToken
+        tokenName: keplrToken,
+        isWalletInstalled: !!(global?.window as any)?.keplr,
+        downloadWalletLink: "https://www.keplr.app/get",
       };
       default: return {};
     }
   }, [
-    isEvmLoading, evmBalance, evmAddress, isEvmConnected, handleEvmPay, open, disconnectEvm,
-    isSolanaLoading, solanaBalance, solanaAddress, isSolanaConnected, handleSolanaPay, connectSolana, disconnectSolana,
-    isKeplrLoading, keplrBalance, keplrAddress, isKeplrConnected, handleKeplrPay, connectKeplr, disconnectKeplr
+    selectedChain,
+    evmBalance,
+    evmAddress,
+    isEvmConnected,
+    disconnectEvm,
+    solanaBalance,
+    solanaAddress,
+    isSolanaConnected,
+    connectSolana,
+    disconnectSolana,
+    keplrBalance,
+    keplrAddress,
+    isKeplrConnected,
+    disconnectKeplr,
+    keplrToken,
+    handleEvmPay,
+    open,
+    handleSolanaPay,
+    handleKeplrPay,
+    connectKeplr,
+    solanaManager,
   ]);
 
   const handleChainChange = async (newChain: string) => {
@@ -109,7 +137,7 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-4xl font-bold text-center mb-8">Multi-Chain Wallet</h1>
+          <h1 className="text-4xl font-bold text-center mb-8">Multi-Chain Wallet Connector</h1>
 
           <Card className="bg-gray-800 border-gray-700 p-6 mb-6">
             <div className="space-y-4">
@@ -128,13 +156,18 @@ export default function Home() {
                 </Select>
               </div>
 
-              <Button
-                onClick={handleConnect}
-                className="w-full bg-blue-600 hover:bg-blue-700"
-              >
-                <Wallet className="mr-2 h-4 w-4" />
-                {isConnected ? 'Connected' : 'Connect Wallet'}
-              </Button>
+              {!handleConnect
+                ? <div className="w-full bg-red-600 p-2">Chain not supported yet</div>
+                : isWalletInstalled
+                  ? <Button
+                    onClick={handleConnect}
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Wallet className="mr-2 h-4 w-4" />
+                    {isConnected ? 'Connected' : 'Connect Wallet'}
+                  </Button>
+                  : <div className="w-full bg-red-600 hover:bg-red-700 p-2">Wallet not fund - <a href={downloadWalletLink} target="_blank" className="font-bold">get it at {downloadWalletLink}</a></div>
+              }
 
               {isConnected && (
                 <div className="space-y-4">
@@ -162,8 +195,9 @@ export default function Home() {
                     onClick={handleDisconnect}
                     className="w-full bg-green-600 hover:bg-green-700"
                   >
-                    Disconnext
+                    Disconnect
                   </Button>
+
                 </div>
               )}
             </div>

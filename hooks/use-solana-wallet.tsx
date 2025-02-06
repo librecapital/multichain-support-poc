@@ -68,6 +68,7 @@ export const useSolanaWallet = () => {
     };
 
     return {
+        solanaManager,
         isSolanaLoading,
         solanaBalance,
         solanaAddress,
