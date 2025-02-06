@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useEvmWallet } from '@/hooks/use-evm-wallet';
 import { useKeplrWallet } from "@/hooks/use-keplr-wallet";
 import { useSolanaWallet } from "@/hooks/use-solana-wallet";
+import { useSuiWallet } from "@/hooks/use-sui-wallet";
 import { Send, Wallet } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
@@ -40,6 +41,10 @@ export default function Home() {
     isKeplrLoading, keplrBalance, keplrAddress, isKeplrConnected,
     handleKeplrPay, connectKeplr, disconnectKeplr, keplrToken
   } = useKeplrWallet();
+
+  const {
+    suiAddress, connectSui, disconnectSui, isSuiConnected, suiBalance, handleSuiPay, isSuiLoading, isSuiWalletInstalled
+  } = useSuiWallet();
 
   const {
     isConnected, handleConnect, handleDisconnect, address, balance, handlePay, tokenName, isWalletInstalled, downloadWalletLink,
@@ -100,6 +105,17 @@ export default function Home() {
         isWalletInstalled: !!(global?.window as any)?.keplr,
         downloadWalletLink: "https://www.keplr.app/get",
       };
+      case "sui": return {
+        handlePay: () => handleSuiPay(),
+        balance: suiBalance,
+        address: suiAddress,
+        isConnected: isSuiConnected,
+        handleConnect: connectSui,
+        handleDisconnect: disconnectSui,
+        tokenName: "SUI",
+        isWalletInstalled: isSuiWalletInstalled,
+        downloadWalletLink: "https://suiwallet.com/",
+      };
       default: return {};
     }
   }, [
@@ -124,6 +140,13 @@ export default function Home() {
     handleKeplrPay,
     connectKeplr,
     solanaManager,
+    handleSuiPay,
+    suiBalance,
+    suiAddress,
+    isSuiConnected,
+    connectSui,
+    disconnectSui,
+    isSuiWalletInstalled
   ]);
 
   const handleChainChange = async (newChain: string) => {

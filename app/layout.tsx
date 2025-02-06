@@ -1,13 +1,17 @@
-import type { Metadata } from 'next';
+'use client';
+import { SuiClientProvider, WalletProvider } from '@mysten/dapp-kit';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Inter } from 'next/font/google';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export const metadata: Metadata = {
+/*export const metadata: Metadata = {
   title: 'Multi-Chain Wallet',
   description: 'Connect and interact with multiple blockchain networks',
-};
+};*/
+
+const queryClient = new QueryClient();
 
 export default function RootLayout({
   children,
@@ -17,7 +21,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <main>{children}</main>
+        <QueryClientProvider client={queryClient}>
+          <SuiClientProvider>
+            <WalletProvider>
+              {children}
+            </WalletProvider>
+          </SuiClientProvider>
+        </QueryClientProvider>
       </body>
     </html>
   );
