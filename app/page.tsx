@@ -22,7 +22,8 @@ const chains = [
   { id: 'injective', name: 'Injective' },
   { id: 'sui', name: 'Sui' },
   { id: 'mantra', name: 'Mantra' },
-  { id: 'solana', name: 'Solana' }
+  { id: 'solana', name: 'Solana' },
+  { id: 'avalanche', name: 'Avalanche' }
 ];
 
 export default function Home() {
@@ -149,6 +150,17 @@ export default function Home() {
         tokenName: "USDC",
         isWalletInstalled: !!(global?.window as any)?.aptos,
         downloadWalletLink: "https://petra.app",
+      };
+      case "avalanche": return {
+        handlePay: () => handleEvmPay(),
+        balance: evmBalance,
+        address: evmAddress,
+        isConnected: isEvmConnected,
+        handleConnect: () => open(43113),
+        handleDisconnect: disconnectEvm,
+        tokenName: "USDC",
+        isWalletInstalled: !!global?.window?.ethereum,
+        downloadWalletLink: "https://metamask.io/",
       };
       default: return {};
     }

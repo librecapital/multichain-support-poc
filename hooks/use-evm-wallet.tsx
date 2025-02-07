@@ -31,7 +31,8 @@ const USDC_ABI = [
 // USDC contract addresses
 const USDC_ADDRESS = {
     1: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-    137: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174'
+    137: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+    43113: "0x5425890298aed601595a70ab815c96711a31bc65"
 }
 
 const getContract = async (walletProvider: ethers.Eip1193Provider, chain: number) => {

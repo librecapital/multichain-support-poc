@@ -27,7 +27,14 @@ const evmChains = [
         currency: "MATIC",
         explorerUrl: "https://polygonscan.com",
         rpcUrl: "https://polygon-rpc.com"
-      }
+    },
+    {
+        chainId: 43113,
+        name: "Avalanche FUJI C-Chain TESTNET",
+        currency: "AVAX",
+        explorerUrl: "https://testnet.snowtrace.io",
+        rpcUrl: "https://api.avax-test.network/ext/bc/C/rpc"
+    }
 ];
 
 // Create EVM configuration
