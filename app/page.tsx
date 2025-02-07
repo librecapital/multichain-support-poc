@@ -4,11 +4,13 @@ import "@/app/wallet-connect-setup/evm-setup";
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useAptosWallet } from "@/hooks/use-aptos-wallet";
+
 import { useEvmWallet } from '@/hooks/use-evm-wallet';
 import { useKeplrWallet } from "@/hooks/use-keplr-wallet";
 import { useSolanaWallet } from "@/hooks/use-solana-wallet";
 import { useSuiWallet } from "@/hooks/use-sui-wallet";
-import { Send, Wallet } from 'lucide-react';
+import { Send, Wallet } from "lucide-react";
 import { useEffect, useMemo, useState } from 'react';
 
 const chains = [
@@ -24,7 +26,7 @@ const chains = [
 
 export default function Home() {
   const [selectedChain, setSelectedChain] = useState('ethereum');
-  const [isInstalled, setIsInstalled] = useState(true);
+  const [isInstalled, setIsInstalled] = useState(false);
   // TODO: 1. Connect wallet
   // TODO: 2. Show USDC balance (or any other token)
   // TODO: 3. Submit transaction signing with the wallet
@@ -46,6 +48,10 @@ export default function Home() {
   const {
     suiAddress, connectSui, disconnectSui, isSuiConnected, suiBalance, handleSuiPay, isSuiLoading, isSuiWalletInstalled
   } = useSuiWallet();
+
+  const {
+    connectAptos, disconnectAptos, aptosAddress, aptosConnected, aptosBalance, handleAptosPay, isAptosLoading
+  } = useAptosWallet();
 
   const {
     isConnected, handleConnect, handleDisconnect, address, balance, handlePay, tokenName, isWalletInstalled, downloadWalletLink,
@@ -117,6 +123,28 @@ export default function Home() {
         isWalletInstalled: isSuiWalletInstalled,
         downloadWalletLink: "https://suiwallet.com/",
       };
+      case "near": return {
+        handlePay: () => handleEvmPay(),
+        balance: evmBalance,
+        address: evmAddress,
+        isConnected: isEvmConnected,
+        handleConnect: () => { },
+        handleDisconnect: disconnectEvm,
+        tokenName: "USDC",
+        isWalletInstalled: !!global?.window?.ethereum,
+        downloadWalletLink: "https://metamask.io/",
+      };
+      case "aptos": return {
+        handlePay: () => handleAptosPay(),
+        balance: aptosBalance,
+        address: aptosAddress,
+        isConnected: aptosConnected,
+        handleConnect: connectAptos,
+        handleDisconnect: disconnectAptos,
+        tokenName: "USDC",
+        isWalletInstalled: !!(global?.window as any)?.aptos,
+        downloadWalletLink: "https://petra.app",
+      };
       default: return {};
     }
   }, [
@@ -147,7 +175,14 @@ export default function Home() {
     isSuiConnected,
     connectSui,
     disconnectSui,
-    isSuiWalletInstalled
+    isSuiWalletInstalled,
+    aptosAddress,
+    aptosConnected,
+    connectAptos,
+    disconnectAptos,
+    aptosBalance,
+    handleAptosPay,
+    isAptosLoading
   ]);
 
   useEffect(() => {

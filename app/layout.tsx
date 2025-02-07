@@ -1,4 +1,5 @@
 'use client';
+import { AptosWalletAdapterProvider } from '@aptos-labs/wallet-adapter-react';
 import { SuiClientProvider, WalletProvider } from '@mysten/dapp-kit';
 import { getFullnodeUrl } from '@mysten/sui/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -28,11 +29,13 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <QueryClientProvider client={queryClient}>
-          <SuiClientProvider networks={networks} defaultNetwork='testnet'>
-            <WalletProvider>
-              {children}
-            </WalletProvider>
-          </SuiClientProvider>
+          <AptosWalletAdapterProvider>
+            <SuiClientProvider networks={networks} defaultNetwork='testnet'>
+              <WalletProvider>
+                {children}
+              </WalletProvider>
+            </SuiClientProvider>
+          </AptosWalletAdapterProvider>
         </QueryClientProvider>
       </body>
     </html>
