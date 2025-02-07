@@ -9,7 +9,7 @@ import { useKeplrWallet } from "@/hooks/use-keplr-wallet";
 import { useSolanaWallet } from "@/hooks/use-solana-wallet";
 import { useSuiWallet } from "@/hooks/use-sui-wallet";
 import { Send, Wallet } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 const chains = [
   { id: 'ethereum', name: 'Ethereum/IMX' },
@@ -24,6 +24,7 @@ const chains = [
 
 export default function Home() {
   const [selectedChain, setSelectedChain] = useState('ethereum');
+  const [isInstalled, setIsInstalled] = useState(true);
   // TODO: 1. Connect wallet
   // TODO: 2. Show USDC balance (or any other token)
   // TODO: 3. Submit transaction signing with the wallet
@@ -149,6 +150,10 @@ export default function Home() {
     isSuiWalletInstalled
   ]);
 
+  useEffect(() => {
+    setIsInstalled(isWalletInstalled ?? false);
+  }, [isWalletInstalled])
+
   const handleChainChange = async (newChain: string) => {
     if (handleDisconnect) {
       await handleDisconnect();
@@ -181,7 +186,7 @@ export default function Home() {
 
               {!handleConnect
                 ? <div className="w-full bg-red-600 p-2">Chain not supported yet</div>
-                : isWalletInstalled
+                : isInstalled
                   ? <Button
                     onClick={handleConnect}
                     className="w-full bg-blue-600 hover:bg-blue-700"
@@ -189,7 +194,7 @@ export default function Home() {
                     <Wallet className="mr-2 h-4 w-4" />
                     {isConnected ? 'Connected' : 'Connect Wallet'}
                   </Button>
-                  : <div className="w-full bg-red-600 hover:bg-red-700 p-2">Wallet not fund - <a href={downloadWalletLink} target="_blank" className="font-bold">get it at {downloadWalletLink}</a></div>
+                  : <div className="w-full bg-red-600 hover:bg-red-700 p-2">Wallet not found - <a href={downloadWalletLink} target="_blank" className="font-bold">get it at {downloadWalletLink}</a></div>
               }
 
               {isConnected && (
