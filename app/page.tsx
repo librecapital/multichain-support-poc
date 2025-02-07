@@ -8,6 +8,7 @@ import { useAptosWallet } from "@/hooks/use-aptos-wallet";
 
 import { useEvmWallet } from '@/hooks/use-evm-wallet';
 import { useKeplrWallet } from "@/hooks/use-keplr-wallet";
+import { useNearWallet } from "@/hooks/use-near-wallet";
 import { useSolanaWallet } from "@/hooks/use-solana-wallet";
 import { useSuiWallet } from "@/hooks/use-sui-wallet";
 import { Send, Wallet } from "lucide-react";
@@ -52,6 +53,10 @@ export default function Home() {
   const {
     connectAptos, disconnectAptos, aptosAddress, aptosConnected, aptosBalance, handleAptosPay, isAptosLoading
   } = useAptosWallet();
+
+  const {
+    connectNear, disconnectNear, isNearConnected, nearAddress, nearBalance, handleNearPay, nearWallet
+  } = useNearWallet();
 
   const {
     isConnected, handleConnect, handleDisconnect, address, balance, handlePay, tokenName, isWalletInstalled, downloadWalletLink,
@@ -124,15 +129,15 @@ export default function Home() {
         downloadWalletLink: "https://suiwallet.com/",
       };
       case "near": return {
-        handlePay: () => handleEvmPay(),
-        balance: evmBalance,
-        address: evmAddress,
-        isConnected: isEvmConnected,
-        handleConnect: () => { },
-        handleDisconnect: disconnectEvm,
+        handlePay: () => handleNearPay(),
+        balance: nearBalance,
+        address: nearAddress,
+        isConnected: isNearConnected,
+        handleConnect: connectNear,
+        handleDisconnect: disconnectNear,
         tokenName: "USDC",
-        isWalletInstalled: !!global?.window?.ethereum,
-        downloadWalletLink: "https://metamask.io/",
+        isWalletInstalled: !!nearWallet,
+        downloadWalletLink: "https://www.mynearwallet.com/",
       };
       case "aptos": return {
         handlePay: () => handleAptosPay(),
@@ -182,7 +187,14 @@ export default function Home() {
     disconnectAptos,
     aptosBalance,
     handleAptosPay,
-    isAptosLoading
+    isAptosLoading,
+    connectNear,
+    disconnectNear,
+    isNearConnected,
+    nearAddress,
+    nearBalance,
+    handleNearPay,
+    nearWallet
   ]);
 
   useEffect(() => {
