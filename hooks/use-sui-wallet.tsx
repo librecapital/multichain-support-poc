@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
-import { useConnectWallet, useCurrentAccount, useDisconnectWallet, useSignAndExecuteTransaction, useWallets } from "@mysten/dapp-kit";
-import { getFullnodeUrl, SuiClient } from "@mysten/sui/client";
-import { Transaction } from "@mysten/sui/transactions";
+import { useConnectWallet, useCurrentAccount, useDisconnectWallet, useSignAndExecuteTransaction, useSuiClient, useWallets } from "@mysten/dapp-kit";
+import { CoinStruct } from "@mysten/sui/client";
+import { Inputs, Transaction } from "@mysten/sui/transactions";
 
 export const useSuiWallet = () => {
     const wallets = useWallets();
@@ -10,8 +10,10 @@ export const useSuiWallet = () => {
     const disconnectWallet = useDisconnectWallet();
     const currentAccount = useCurrentAccount();
     const signAndExecuteTransaction = useSignAndExecuteTransaction();
-    const client = new SuiClient({ url: getFullnodeUrl('devnet') });
-    const coin = "0x2::sui::SUI";
+    const client = useSuiClient();
+    const sui_default_coin: string = "0x2::sui::SUI";
+    const coin: string = "0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC";
+    const amount = 1;
 
     const [suiAddress, setSuiAddress] = useState<string | null>(null);
     const [suiBalance, setSuiBalance] = useState<number | null>(null);
@@ -59,17 +61,10 @@ export const useSuiWallet = () => {
         if (!suiAddress) return;
         setIsSuiLoading(true);
         try {
-            const tx = new Transaction();
-            const coins = await client.getCoins({
-                owner: suiAddress,
-                coinType: coin
-            });
-            const objectId = coins?.data?.at(0)?.coinObjectId;
-            if (!objectId) {
-                throw Error("No object id defined");
+            const tx = await buildTransaction();
+            if (!tx) {
+                throw Error("Error while building transaction");
             }
-            const [coinsToSend] = tx.splitCoins(objectId, [0]);
-            tx.transferObjects([coinsToSend], suiAddress);
             await signAndExecuteTransaction.mutateAsync({ transaction: tx });
         } catch (error) {
             console.error("Error sending transaction:", error);
@@ -77,6 +72,56 @@ export const useSuiWallet = () => {
             setIsSuiLoading(false);
         }
     };
+
+    async function buildTransaction(): Promise<Transaction | undefined> {
+        if (!suiAddress) throw Error("No address set");
+        const tx = new Transaction();
+        if (coin === sui_default_coin) {
+            // If sui token the following logic should be applied
+            const [coin] = tx.splitCoins(tx.gas, [amount]);
+            tx.transferObjects([coin], suiAddress);
+            return tx;
+        }
+        // If custom owned token
+        const coins = await retrieveAllCoins();
+        if (!coins || coins.length === 0) throw Error("No coins found");
+        const primaryCoin = retrieveOwnedCoinObject(coins[0], tx);
+        if (coins.length > 1) {
+            // Merge additional coins if they exist
+            const coinsToMerge = coins
+                .slice(1)
+                .map(coin => retrieveOwnedCoinObject(coin, tx));
+            tx.mergeCoins(
+                primaryCoin,
+                coinsToMerge
+            );
+        }
+        const [splitCoin] = tx.splitCoins(primaryCoin, [amount]);
+        tx.transferObjects([splitCoin], suiAddress);
+        return tx;
+    }
+
+    async function retrieveAllCoins() {
+        if (!suiAddress) throw Error("No address set");
+        let allCoins: CoinStruct[] = [];
+        let hasNextPage = true;
+        let nextCursor: string | null | undefined;
+        for (; hasNextPage;) {
+            const response = await client.getCoins({
+                owner: suiAddress,
+                coinType: coin,
+                cursor: nextCursor,
+            });
+            allCoins = allCoins.concat(response.data);
+            hasNextPage = response.hasNextPage;
+            nextCursor = response.nextCursor;
+        }
+        return allCoins;
+    }
+
+    function retrieveOwnedCoinObject(coin: CoinStruct, tx: Transaction) {
+        return tx.object(Inputs.ObjectRef({ digest: coin.digest, objectId: coin.coinObjectId, version: coin.version }));
+    }
 
     return {
         suiAddress,

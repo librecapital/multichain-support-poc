@@ -1,5 +1,6 @@
 'use client';
 import { SuiClientProvider, WalletProvider } from '@mysten/dapp-kit';
+import { getFullnodeUrl } from '@mysten/sui/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Inter } from 'next/font/google';
 import './globals.css';
@@ -12,6 +13,11 @@ const inter = Inter({ subsets: ['latin'] });
 };*/
 
 const queryClient = new QueryClient();
+const networks = {
+  devnet: { url: getFullnodeUrl('devnet') },
+  mainnet: { url: getFullnodeUrl('mainnet') },
+  testnet: { url: getFullnodeUrl('testnet') },
+};
 
 export default function RootLayout({
   children,
@@ -22,7 +28,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <QueryClientProvider client={queryClient}>
-          <SuiClientProvider>
+          <SuiClientProvider networks={networks} defaultNetwork='testnet'>
             <WalletProvider>
               {children}
             </WalletProvider>

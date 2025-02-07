@@ -112,7 +112,7 @@ export default function Home() {
         isConnected: isSuiConnected,
         handleConnect: connectSui,
         handleDisconnect: disconnectSui,
-        tokenName: "SUI",
+        tokenName: "USDC",
         isWalletInstalled: isSuiWalletInstalled,
         downloadWalletLink: "https://suiwallet.com/",
       };
