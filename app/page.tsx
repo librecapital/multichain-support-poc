@@ -21,7 +21,7 @@ export default function Home() {
   const [selectedChain, setSelectedChain] = useState<string>('ethereum');
   const [selectedAsset, setSelectedAsset] = useState<string>('USDC');
   const [beneficiaryAddress, setBeneficiaryAddress] = useState<string>('');
-  const [amount, setAmount] = useState<number>(1);
+  const [amount, setAmount] = useState<number>(0);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isSupportedChainsVisible, setIsSupportedChainsVisible] = useState<boolean>(false);
   const {
@@ -257,20 +257,22 @@ export default function Home() {
 
           <Card className="bg-gray-100 border-gray-700 p-6 mb-6">
             <div className="space-y-4">
-              <div className="flex items-center space-x-4">
-                <Select value={selectedChain} onValueChange={handleChainChange}>
-                  <div className="w-20 font-bold">Network</div>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select Chain" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {supportedChains.map((chain) => (
-                      <SelectItem key={chain.id} value={chain.id}>
-                        {chain.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="flex items-center">
+                <div className="w-[100px] font-bold">From</div>
+                <div className="w-full">
+                  <Select value={selectedChain} onValueChange={handleChainChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select Chain" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {supportedChains.map((chain) => (
+                        <SelectItem key={chain.id} value={chain.id}>
+                          {chain.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               {isConnected
                 ? <div className="flex justify-between">
@@ -285,20 +287,27 @@ export default function Home() {
 
               {isConnected &&
                 <>
-                  <div className="flex items-center space-x-4">
-                    <Select value={selectedAsset} onValueChange={handleAssetChange}>
-                      <div className="w-20 font-bold">Asset</div>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select Asset" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value={"USDC"}>
-                          USDC
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
+                  <div className="flex items-center">
+                    <div className="w-[100px] font-bold">Asset</div>
+                    <div className="w-full">
+                      <Select value={selectedAsset} onValueChange={handleAssetChange}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select Asset" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={"USDC"}>
+                            USDC
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                   {selectedAsset && <p className="text-sm text-gray-700">Balance: {balance} {tokenName}</p>}
+
+                  <div className="flex items-center">
+                    <div className="w-[100px] font-bold">Amount</div>
+                    <Input type="number" value={amount} onChange={handleAmountChange} min="0" step={0.01} readOnly disabled />
+                  </div>
                 </>
               }
 
@@ -308,11 +317,28 @@ export default function Home() {
 
               {isConnected && (
                 <div className="space-y-4">
-                  <div className="font-bold">To</div>
-                  <Input value={beneficiaryAddress} onChange={handleBeneficiaryAddressChange} />
+                  <div className="flex items-center space-x-4">
+                    <div className="w-[100px] font-bold">Send To</div>
+                    <div className="w-auto">
+                      <Select value={selectedChain} onValueChange={handleChainChange} disabled>
 
-                  {/* <div>Amount to be Sent</div>
-                  <Input type="number" value={amount} onChange={handleAmountChange} min="0" step={0.01} /> */}
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select Chain" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {supportedChains.map((chain) => (
+                            <SelectItem key={chain.id} value={chain.id}>
+                              {chain.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="w-full">
+                      <Input value={beneficiaryAddress} onChange={handleBeneficiaryAddressChange} />
+                    </div>
+                  </div>
+
                   <Button
                     onClick={handlePay}
                     className="w-full bg-green-600 hover:bg-green-700"
