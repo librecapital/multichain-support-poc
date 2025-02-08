@@ -250,12 +250,12 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
+    <div className="min-h-screen md:bg-gradient-to-b md:from-gray-900 md:to-gray-800 md:text-white text-black">
       <div className="container mx-auto px-4 py-8 w-full">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-4xl font-bold text-center mb-8">Libre Gateway PoC</h1>
 
-          <Card className="bg-gray-100 border-gray-700 p-6 mb-6">
+          <Card className="md:bg-gray-100 md:border-gray-700 md:p-6 mb-6 bg-transparent border-transparent">
             <div className="space-y-4">
               <div className="flex items-center">
                 <div className="w-[100px] font-bold">From</div>
