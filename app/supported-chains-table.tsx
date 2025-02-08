@@ -10,8 +10,8 @@ export const SupportedChainsTable = () => {
                 <table className="w-full border-collapse">
                     <thead className="bg-gray-100">
                         <tr>
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 border-b">Chain</th>
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 border-b">Wallet</th>
+                            <th className="px-6 py-4 text-sm font-semibold text-gray-700 border-b">Chain</th>
+                            <th className="px-6 py-4 text-sm font-semibold text-gray-700 border-b">Wallet</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y">

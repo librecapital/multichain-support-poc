@@ -12,7 +12,7 @@ import { useKeplrWallet } from "@/hooks/use-keplr-wallet";
 import { useNearWallet } from "@/hooks/use-near-wallet";
 import { useSolanaWallet } from "@/hooks/use-solana-wallet";
 import { useSuiWallet } from "@/hooks/use-sui-wallet";
-import { Send, Wallet } from "lucide-react";
+import { Link, Send, Unlink } from "lucide-react";
 import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { APTOS_ADDRESS_REGEX, ETH_ADDRESS_REGEX, INJECTIVE_ADDRESS_REGEX, MANTRA_ADDRESS_REGEX, NEAR_ADDRESS_REGEX, SOLANA_ADDRESS_REGEX, SUI_ADDRESS_REGEX, supportedChains, supportedWallets } from "./config";
 import { SupportedChainsTable } from "./supported-chains-table";
@@ -251,15 +251,15 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="text-4xl font-bold text-center mb-8">Libre Wallet Connector</h1>
+      <div className="container mx-auto px-4 py-8 w-full">
+        <div className="max-w-3xl mx-auto">
+          <h1 className="text-4xl font-bold text-center mb-8">Libre Gateway PoC</h1>
 
           <Card className="bg-gray-100 border-gray-700 p-6 mb-6">
             <div className="space-y-4">
               <div className="flex items-center space-x-4">
                 <Select value={selectedChain} onValueChange={handleChainChange}>
-                  <div className="w-20">Network</div>
+                  <div className="w-20 font-bold">Network</div>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select Chain" />
                   </SelectTrigger>
@@ -273,24 +273,21 @@ export default function Home() {
                 </Select>
               </div>
               {isConnected
-                ? <p className="text-sm text-gray-700">Connected Address: {address}</p>
-                : <p className="text-sm" >Connected Address: <span className="text-red-600">Not Yet Connected</span></p>
-              }
-
-              {isConnected &&
-                <Button
-                  onClick={handleDisconnect}
-                  className="w-full bg-red-600 hover:bg-red-700"
-                >
-                  Disconnect
-                </Button>
+                ? <div className="flex justify-between">
+                  <div className="text-sm text-gray-700">Connected Address: {address}</div>
+                  <div className="flex cursor-pointer hover:text-blue-800" onClick={handleDisconnect}><Unlink className="mr-2 h-4 w-4" />Disconnect</div>
+                </div>
+                : <div className="flex justify-between">
+                  <div className="text-sm text-gray-700" >Connected Address: <span className="text-red-600">Not Yet Connected</span></div>
+                  <div className="flex cursor-pointer hover:text-blue-800" onClick={handleConnect}><Link className="mr-2 h-4 w-4" />Connect Wallet</div>
+                </div>
               }
 
               {isConnected &&
                 <>
                   <div className="flex items-center space-x-4">
                     <Select value={selectedAsset} onValueChange={handleAssetChange}>
-                      <div className="w-20">Asset</div>
+                      <div className="w-20 font-bold">Asset</div>
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select Asset" />
                       </SelectTrigger>
@@ -305,26 +302,13 @@ export default function Home() {
                 </>
               }
 
-              {!isConnected &&
-                <>
-                  {!handleConnect
-                    ? <div className="w-full bg-red-600 p-2">Chain not supported yet</div>
-                    : isInstalled
-                      ? <Button
-                        onClick={handleConnect}
-                        className="w-full bg-blue-600 hover:bg-blue-700"
-                      >
-                        <Wallet className="mr-2 h-4 w-4" />
-                        {isConnected ? 'Connected' : 'Connect Wallet'}
-                      </Button>
-                      : <div className="w-full bg-red-600 hover:bg-red-700 p-2">Wallet not found - <a href={walletInfo.name} target="_blank" className="font-bold">get it at {walletInfo.name}</a></div>
-                  }
-                </>
-              }
+              {!handleConnect && <div className="w-full text-red-600 p-2">Chain not supported yet</div>}
+
+              {!isConnected && !isInstalled && walletInfo && <div className="w-full bg-red-600 hover:bg-red-700 p-2">Wallet not found - <a href={walletInfo.name} target="_blank" className="font-bold">get it at {walletInfo.name}</a></div>}
 
               {isConnected && (
                 <div className="space-y-4">
-                  <div>Destination Address</div>
+                  <div className="font-bold">To</div>
                   <Input value={beneficiaryAddress} onChange={handleBeneficiaryAddressChange} />
 
                   {/* <div>Amount to be Sent</div>
@@ -346,14 +330,13 @@ export default function Home() {
             </div>
           </Card>
 
-          <div>
-            <Button
+          <div className="w-full text-center">
+            <div
               onClick={() => setIsSupportedChainsVisible(prev => !prev)}
-              className="w-full bg-gray-800 hover:bg-gray-600"
-              disabled={!isValidAddress}
+              className="bg-transparent cursor-pointer "
             >
               {isSupportedChainsVisible ? "Hide Supported Chains" : "Show Supported Chains"}
-            </Button>
+            </div>
             {isSupportedChainsVisible && <SupportedChainsTable />}
           </div>
 
