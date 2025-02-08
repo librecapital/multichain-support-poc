@@ -313,7 +313,7 @@ export default function Home() {
 
               {!handleConnect && <div className="w-full text-red-600 p-2">Chain not supported yet</div>}
 
-              {!isConnected && !isInstalled && walletInfo && <div className="w-full bg-red-600 hover:bg-red-700 p-2">Wallet not found - <a href={walletInfo.name} target="_blank" className="font-bold">get it at {walletInfo.name}</a></div>}
+              {!isConnected && !isInstalled && walletInfo && <div className="w-full bg-red-600 hover:bg-red-700 p-2">Wallet not found - <a href={walletInfo.website} target="_blank" className="font-bold">get it at {walletInfo.website}</a></div>}
 
               {isConnected && (
                 <div className="space-y-4">
