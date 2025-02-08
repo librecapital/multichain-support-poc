@@ -7,12 +7,15 @@ export const useAptosWallet = () => {
     const { account, connected: aptosConnected, signAndSubmitTransaction, connect, disconnect } = useWallet();
     const [aptosAddress, setAptosAddress] = useState<string | undefined>(undefined);
     const [aptosBalance, setAptosBalance] = useState<number | null>(null);
-    const [isAptosLoading, setIsAptosLoading] = useState(false);
+    const [isAptosLoading, setIsAptosLoading] = useState<boolean>(false);
+    const [isPetraInstalled, setIsPetraInstalled] = useState<boolean>(false);
+
     const config = new AptosConfig({ network: Network.TESTNET });
     const aptos = new Aptos(config);
     const coinAddress = "0x69091fbab5f7d635ee7ac5098cf0c1efbe31d68fec0f2cd565e8d168daf52832"; //USDC
 
     const connectAptos = async () => {
+        if (!isPetraInstalled) return;
         connect("Petra" as WalletName<"Petra">);
     };
 
@@ -33,6 +36,16 @@ export const useAptosWallet = () => {
         handleGetBalance();
         setAptosAddress(address);
     }, [aptosConnected]);
+
+    useEffect(() => {
+        const checkKeplrInstallation = () => {
+            const isInstalled = typeof window !== 'undefined' &&
+                (global?.window as unknown as { aptos?: unknown })?.aptos !== undefined;
+            setIsPetraInstalled(!!isInstalled);
+        };
+
+        checkKeplrInstallation();
+    }, []);
 
     const disconnectAptos = async () => {
         disconnect();
@@ -62,6 +75,7 @@ export const useAptosWallet = () => {
     };
 
     return {
+        isPetraInstalled,
         connectAptos,
         disconnectAptos,
         aptosAddress,

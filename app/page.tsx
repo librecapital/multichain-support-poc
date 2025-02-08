@@ -30,12 +30,12 @@ export default function Home() {
   } = useEvmWallet();
 
   const {
-    isSolanaLoading, solanaBalance, solanaAddress, isSolanaConnected, solanaManager,
+    isSolanaLoading, solanaBalance, solanaAddress, isSolanaConnected, solanaManager, isPhantomInstalled,
     handleSolanaPay, connectSolana, disconnectSolana
   } = useSolanaWallet();
 
   const {
-    isKeplrLoading, keplrBalance, keplrAddress, isKeplrConnected,
+    isKeplrLoading, keplrBalance, keplrAddress, isKeplrConnected, isKeplrInstalled,
     handleKeplrPay, connectKeplr, disconnectKeplr, keplrToken
   } = useKeplrWallet();
 
@@ -65,7 +65,7 @@ export default function Home() {
         handleConnect: () => open(1),
         handleDisconnect: disconnectEvm,
         tokenName: "USDC",
-        isWalletInstalled: !!global?.window?.ethereum,
+        isWalletInstalled: true, // we use wallet connect
         walletInfo: supportedWallets.metamask,
       };
       case "polygon": return {
@@ -78,7 +78,7 @@ export default function Home() {
         handleConnect: () => open(137),
         handleDisconnect: disconnectEvm,
         tokenName: "USDC",
-        isWalletInstalled: !!global?.window?.ethereum,
+        isWalletInstalled: true, // we use wallet connect
         walletInfo: supportedWallets.metamask,
       };
       case "avalanche": return {
@@ -91,7 +91,7 @@ export default function Home() {
         handleConnect: () => open(43113),
         handleDisconnect: disconnectEvm,
         tokenName: "USDC",
-        isWalletInstalled: !!global?.window?.ethereum,
+        isWalletInstalled: true, // we use wallet connect
         walletInfo: supportedWallets.metamask,
       };
       case "solana": return {
@@ -104,7 +104,7 @@ export default function Home() {
         handleConnect: connectSolana,
         handleDisconnect: disconnectSolana,
         tokenName: "USDC",
-        isWalletInstalled: !!solanaManager,
+        isWalletInstalled: isPhantomInstalled,
         walletInfo: supportedWallets.phantom,
       };
       case "mantra": return {
@@ -117,7 +117,7 @@ export default function Home() {
         handleConnect: () => connectKeplr("mantra-dukong-1", "https://rpc.dukong.mantrachain.io", "uom"),
         handleDisconnect: disconnectKeplr,
         tokenName: keplrToken,
-        isWalletInstalled: !!(global?.window as any)?.keplr,
+        isWalletInstalled: isKeplrInstalled,
         walletInfo: supportedWallets.keplr,
       };
       case "injective": return {
@@ -130,7 +130,7 @@ export default function Home() {
         handleConnect: () => connectKeplr("injective-888", "https://testnet.sentry.tm.injective.network:443", "inj"),
         handleDisconnect: disconnectKeplr,
         tokenName: keplrToken,
-        isWalletInstalled: !!(global?.window as any)?.keplr,
+        isWalletInstalled: isKeplrInstalled,
         walletInfo: supportedWallets.keplr,
       };
       case "sui": return {
@@ -274,7 +274,7 @@ export default function Home() {
                   </Select>
                 </div>
               </div>
-              {isConnected
+              {isInstalled && isConnected
                 ? <div className="flex justify-between">
                   <div className="text-sm text-gray-700">Connected Address: {address}</div>
                   <div className="flex cursor-pointer hover:text-blue-800" onClick={handleDisconnect}><Unlink className="mr-2 h-4 w-4" />Disconnect</div>
@@ -313,7 +313,12 @@ export default function Home() {
 
               {!handleConnect && <div className="w-full text-red-600 p-2">Chain not supported yet</div>}
 
-              {!isConnected && !isInstalled && walletInfo && <div className="w-full bg-red-600 hover:bg-red-700 p-2">Wallet not found - <a href={walletInfo.website} target="_blank" className="font-bold">get it at {walletInfo.website}</a></div>}
+              {!isInstalled && walletInfo &&
+                <div className="w-full bg-red-300 p-2 text-red-800">
+                  <p className="font-bold">Wallet not found!</p>
+                  <p className="font-mono underline"><a href={walletInfo.website} target="_blank" className="font-bold hover:text-blue-600">Click here to get {walletInfo.name}</a></p>
+                </div>
+              }
 
               {isConnected && (
                 <div className="space-y-4">

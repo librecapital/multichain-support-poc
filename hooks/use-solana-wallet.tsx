@@ -13,6 +13,7 @@ export const useSolanaWallet = () => {
     const [solanaManager, setSolanaManager] = useState<SolanaManager | null>(null);
     const [solanaAddress, setSolanaAddress] = useState<string | null>(null);
     const [solanaBalance, setSolanaBalance] = useState<number | null>(null);
+    const [isPhantomInstalled, setIsPhantomInstalled] = useState(false);
     const [isSolanaLoading, setIsSolanaLoading] = useState(false);
 
     const isSolanaConnected = !!solanaAddress;
@@ -23,10 +24,21 @@ export const useSolanaWallet = () => {
     }, []);
 
     useEffect(() => {
+        const checkPhantomInstallation = () => {
+            const isInstalled = typeof window !== 'undefined' &&
+                (global?.window as unknown as {phantom?: {solana: undefined}})?.phantom?.solana !== undefined;
+            setIsPhantomInstalled(!!isInstalled);
+        };
+
+        checkPhantomInstallation();
+    }, []);
+
+    useEffect(() => {
         SolanaManager.listenToWalletChanges(setSolanaAddress);
     }, []);
 
     const connectSolana = async () => {
+        if (!isPhantomInstalled) return;
         const address = await solanaManager?.connectWallet() ?? null;
         setSolanaAddress(address);
     };
@@ -69,6 +81,7 @@ export const useSolanaWallet = () => {
     };
 
     return {
+        isPhantomInstalled,
         solanaManager,
         isSolanaLoading,
         solanaBalance,

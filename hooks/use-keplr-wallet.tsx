@@ -10,8 +10,10 @@ export const useKeplrWallet = () => {
     const [isKeplrLoading, setIsKeplrLoading] = useState(false);
     const [keplrToken, setKeplrToken] = useState<string | null>(null);
     const [isKeplrConnected, setIsKeplrConnected] = useState<boolean>(false);
+    const [isKeplrInstalled, setIsKeplrInstalled] = useState<boolean>(false);
 
     const connectKeplr = async (chain: string, rpc: string, token: string) => {
+        if (!isKeplrInstalled) return;
         const km = await KeplrManager.create(chain, rpc);
         const address = await km?.connectWallet();
         if (!address) {
@@ -22,6 +24,16 @@ export const useKeplrWallet = () => {
         setKeplrToken(token);
         setIsKeplrConnected(true);
     };
+
+    useEffect(() => {
+        const checkKeplrInstallation = () => {
+            const isInstalled = typeof window !== 'undefined' &&
+                (global?.window as unknown as { keplr?: unknown })?.keplr !== undefined;
+            setIsKeplrInstalled(!!isInstalled);
+        };
+
+        checkKeplrInstallation();
+    }, []);
 
     const disconnectKeplr = async () => {
         await keplrManager?.disconnectWallet();
@@ -66,6 +78,7 @@ export const useKeplrWallet = () => {
     };
 
     return {
+        isKeplrInstalled,
         keplrManager,
         isKeplrLoading,
         keplrBalance,
