@@ -1,3 +1,4 @@
+import { APTOS_ADDRESS_REGEX } from "@/app/config";
 import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
 import { useWallet, WalletName } from "@aptos-labs/wallet-adapter-react";
 import { useEffect, useState } from "react";
@@ -37,8 +38,8 @@ export const useAptosWallet = () => {
         disconnect();
     };
 
-    const handleAptosPay = async (): Promise<string | undefined> => {
-        if (!aptosAddress) return;
+    const handleAptosPay = async (beneficiaryAddress: string): Promise<string | undefined> => {
+        if (!aptosAddress || !APTOS_ADDRESS_REGEX.test(beneficiaryAddress)) return;
         setIsAptosLoading(true);
         try {
             await signAndSubmitTransaction({
@@ -48,7 +49,7 @@ export const useAptosWallet = () => {
                     typeArguments: ["0x1::fungible_asset::Metadata"], // e.g., "0x123::my_token::MyToken"
                     functionArguments: [
                         coinAddress,
-                        aptosAddress,
+                        beneficiaryAddress,
                         1000000
                     ]
                 }

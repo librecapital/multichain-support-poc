@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { KeplrManager } from "@/classes/keplr-manager";
+import { INJECTIVE_ADDRESS_REGEX, MANTRA_ADDRESS_REGEX } from "@/app/config";
 
 export const useKeplrWallet = () => {
     const [keplrManager, setKeplrManager] = useState<KeplrManager | null>(null);
@@ -44,8 +45,8 @@ export const useKeplrWallet = () => {
 
     }, [isKeplrConnected, keplrManager, keplrAddress, keplrToken]);
 
-    const handleKeplrPay = async (): Promise<string | undefined> => {
-        if (!keplrAddress || !keplrToken) return;
+    const handleKeplrPay = async (beneficiaryAddress: string): Promise<string | undefined> => {
+        if (!keplrAddress || !keplrToken || (!INJECTIVE_ADDRESS_REGEX.test(beneficiaryAddress) && !MANTRA_ADDRESS_REGEX.test(beneficiaryAddress))) return;
 
         setIsKeplrLoading(true);
 

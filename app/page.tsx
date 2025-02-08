@@ -6,32 +6,24 @@ import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAptosWallet } from "@/hooks/use-aptos-wallet";
 
+import { Input } from "@/components/ui/input";
 import { useEvmWallet } from '@/hooks/use-evm-wallet';
 import { useKeplrWallet } from "@/hooks/use-keplr-wallet";
 import { useNearWallet } from "@/hooks/use-near-wallet";
 import { useSolanaWallet } from "@/hooks/use-solana-wallet";
 import { useSuiWallet } from "@/hooks/use-sui-wallet";
 import { Send, Wallet } from "lucide-react";
-import { useEffect, useMemo, useState } from 'react';
-
-const chains = [
-  { id: 'ethereum', name: 'Ethereum/IMX' },
-  { id: 'polygon', name: 'Polygon' },
-  { id: 'near', name: 'NEAR' },
-  { id: 'aptos', name: 'Aptos' },
-  { id: 'injective', name: 'Injective' },
-  { id: 'sui', name: 'Sui' },
-  { id: 'mantra', name: 'Mantra' },
-  { id: 'solana', name: 'Solana' },
-  { id: 'avalanche', name: 'Avalanche' }
-];
+import { ChangeEvent, useEffect, useMemo, useState } from 'react';
+import { APTOS_ADDRESS_REGEX, ETH_ADDRESS_REGEX, INJECTIVE_ADDRESS_REGEX, MANTRA_ADDRESS_REGEX, NEAR_ADDRESS_REGEX, SOLANA_ADDRESS_REGEX, SUI_ADDRESS_REGEX, supportedChains, supportedWallets } from "./config";
+import { SupportedChainsTable } from "./supported-chains-table";
 
 export default function Home() {
-  const [selectedChain, setSelectedChain] = useState('ethereum');
+  const [selectedChain, setSelectedChain] = useState<string>('ethereum');
+  const [selectedAsset, setSelectedAsset] = useState<string>('USDC');
+  const [beneficiaryAddress, setBeneficiaryAddress] = useState<string>('');
+  const [amount, setAmount] = useState<number>(1);
   const [isInstalled, setIsInstalled] = useState(false);
-  // TODO: 1. Connect wallet
-  // TODO: 2. Show USDC balance (or any other token)
-  // TODO: 3. Submit transaction signing with the wallet
+  const [isSupportedChainsVisible, setIsSupportedChainsVisible] = useState<boolean>(false);
   const {
     isEvmLoading, evmBalance, evmAddress, isEvmConnected,
     open, handleEvmPay, disconnectEvm
@@ -60,77 +52,103 @@ export default function Home() {
   } = useNearWallet();
 
   const {
-    isConnected, handleConnect, handleDisconnect, address, balance, handlePay, tokenName, isWalletInstalled, downloadWalletLink,
+    isConnected, handleConnect, handleDisconnect, address, balance, handlePay, tokenName, isWalletInstalled, walletInfo, isLoading, isValidAddress,
   } = useMemo(() => {
     switch (selectedChain) {
       case "ethereum": return {
-        handlePay: () => handleEvmPay(),
+        handlePay: () => ETH_ADDRESS_REGEX.test(beneficiaryAddress) && handleEvmPay(beneficiaryAddress as `0x${string}`),
+        isValidAddress: ETH_ADDRESS_REGEX.test(beneficiaryAddress),
         balance: evmBalance,
         address: evmAddress,
+        isLoading: isEvmLoading,
         isConnected: isEvmConnected,
         handleConnect: () => open(1),
         handleDisconnect: disconnectEvm,
         tokenName: "USDC",
         isWalletInstalled: !!global?.window?.ethereum,
-        downloadWalletLink: "https://metamask.io/",
+        walletInfo: supportedWallets.metamask,
       };
       case "polygon": return {
-        handlePay: () => handleEvmPay(),
+        handlePay: () => ETH_ADDRESS_REGEX.test(beneficiaryAddress) && handleEvmPay(beneficiaryAddress as `0x${string}`),
+        isValidAddress: ETH_ADDRESS_REGEX.test(beneficiaryAddress),
         balance: evmBalance,
         address: evmAddress,
+        isLoading: isEvmLoading,
         isConnected: isEvmConnected,
         handleConnect: () => open(137),
         handleDisconnect: disconnectEvm,
         tokenName: "USDC",
         isWalletInstalled: !!global?.window?.ethereum,
-        downloadWalletLink: "https://metamask.io/",
+        walletInfo: supportedWallets.metamask,
+      };
+      case "avalanche": return {
+        handlePay: () => ETH_ADDRESS_REGEX.test(beneficiaryAddress) && handleEvmPay(beneficiaryAddress as `0x${string}`),
+        isValidAddress: ETH_ADDRESS_REGEX.test(beneficiaryAddress),
+        balance: evmBalance,
+        address: evmAddress,
+        isLoading: isEvmLoading,
+        isConnected: isEvmConnected,
+        handleConnect: () => open(43113),
+        handleDisconnect: disconnectEvm,
+        tokenName: "USDC",
+        isWalletInstalled: !!global?.window?.ethereum,
+        walletInfo: supportedWallets.metamask,
       };
       case "solana": return {
-        handlePay: () => handleSolanaPay(),
+        handlePay: () => handleSolanaPay(beneficiaryAddress),
+        isValidAddress: SOLANA_ADDRESS_REGEX.test(beneficiaryAddress),
         balance: solanaBalance,
         address: solanaAddress,
+        isLoading: isSolanaLoading,
         isConnected: isSolanaConnected,
         handleConnect: connectSolana,
         handleDisconnect: disconnectSolana,
         tokenName: "USDC",
         isWalletInstalled: !!solanaManager,
-        downloadWalletLink: "https://www.phantom.com/",
+        walletInfo: supportedWallets.phantom,
       };
       case "mantra": return {
-        handlePay: () => handleKeplrPay(),
+        handlePay: () => handleKeplrPay(beneficiaryAddress),
+        isValidAddress: MANTRA_ADDRESS_REGEX.test(beneficiaryAddress),
         balance: keplrBalance,
         address: keplrAddress,
+        isLoading: isKeplrLoading,
         isConnected: isKeplrConnected,
         handleConnect: () => connectKeplr("mantra-dukong-1", "https://rpc.dukong.mantrachain.io", "uom"),
         handleDisconnect: disconnectKeplr,
         tokenName: keplrToken,
         isWalletInstalled: !!(global?.window as any)?.keplr,
-        downloadWalletLink: "https://www.keplr.app/get",
+        walletInfo: supportedWallets.keplr,
       };
       case "injective": return {
-        handlePay: () => handleKeplrPay(),
+        handlePay: () => handleKeplrPay(beneficiaryAddress),
+        isValidAddress: INJECTIVE_ADDRESS_REGEX.test(beneficiaryAddress),
         balance: keplrBalance,
         address: keplrAddress,
+        isLoading: isKeplrLoading,
         isConnected: isKeplrConnected,
         handleConnect: () => connectKeplr("injective-888", "https://testnet.sentry.tm.injective.network:443", "inj"),
         handleDisconnect: disconnectKeplr,
         tokenName: keplrToken,
         isWalletInstalled: !!(global?.window as any)?.keplr,
-        downloadWalletLink: "https://www.keplr.app/get",
+        walletInfo: supportedWallets.keplr,
       };
       case "sui": return {
-        handlePay: () => handleSuiPay(),
+        handlePay: () => handleSuiPay(beneficiaryAddress),
+        isValidAddress: SUI_ADDRESS_REGEX.test(beneficiaryAddress),
         balance: suiBalance,
         address: suiAddress,
+        isLoading: isSuiLoading,
         isConnected: isSuiConnected,
         handleConnect: connectSui,
         handleDisconnect: disconnectSui,
         tokenName: "USDC",
         isWalletInstalled: isSuiWalletInstalled,
-        downloadWalletLink: "https://suiwallet.com/",
+        walletInfo: supportedWallets.suiWallet,
       };
       case "near": return {
-        handlePay: () => handleNearPay(),
+        handlePay: () => handleNearPay(beneficiaryAddress),
+        isValidAddress: NEAR_ADDRESS_REGEX.test(beneficiaryAddress),
         balance: nearBalance,
         address: nearAddress,
         isConnected: isNearConnected,
@@ -138,29 +156,20 @@ export default function Home() {
         handleDisconnect: disconnectNear,
         tokenName: "USDC",
         isWalletInstalled: !!nearWallet,
-        downloadWalletLink: "https://www.mynearwallet.com/",
+        walletInfo: supportedWallets.myNearWallet,
       };
       case "aptos": return {
-        handlePay: () => handleAptosPay(),
+        handlePay: () => handleAptosPay(beneficiaryAddress),
+        isValidAddress: APTOS_ADDRESS_REGEX.test(beneficiaryAddress),
         balance: aptosBalance,
         address: aptosAddress,
+        isLoading: isAptosLoading,
         isConnected: aptosConnected,
         handleConnect: connectAptos,
         handleDisconnect: disconnectAptos,
         tokenName: "USDC",
         isWalletInstalled: !!(global?.window as any)?.aptos,
-        downloadWalletLink: "https://petra.app",
-      };
-      case "avalanche": return {
-        handlePay: () => handleEvmPay(),
-        balance: evmBalance,
-        address: evmAddress,
-        isConnected: isEvmConnected,
-        handleConnect: () => open(43113),
-        handleDisconnect: disconnectEvm,
-        tokenName: "USDC",
-        isWalletInstalled: !!global?.window?.ethereum,
-        downloadWalletLink: "https://metamask.io/",
+        walletInfo: supportedWallets.petra,
       };
       default: return {};
     }
@@ -199,7 +208,6 @@ export default function Home() {
     disconnectAptos,
     aptosBalance,
     handleAptosPay,
-    isAptosLoading,
     connectNear,
     disconnectNear,
     isNearConnected,
@@ -209,9 +217,22 @@ export default function Home() {
     nearWallet
   ]);
 
+  const handleBeneficiaryAddressChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setBeneficiaryAddress(e.target.value);
+  }
+
+  const handleAmountChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = Number(e.target.value);
+    setAmount(isNaN(value) ? 0 : Number(value));
+  }
+
   useEffect(() => {
     setIsInstalled(isWalletInstalled ?? false);
-  }, [isWalletInstalled])
+  }, [isWalletInstalled]);
+
+  useEffect(() => {
+    setBeneficiaryAddress(address || "");
+  }, [isConnected]);
 
   const handleChainChange = async (newChain: string) => {
     if (handleDisconnect) {
@@ -220,21 +241,30 @@ export default function Home() {
     setSelectedChain(newChain);
   };
 
+  const handleAssetChange = async (newChain: string) => {
+    if (handleDisconnect) {
+      await handleDisconnect();
+    }
+    setSelectedChain(newChain);
+    setBeneficiaryAddress(address || "");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-4xl font-bold text-center mb-8">Multi-Chain Wallet Connector</h1>
+          <h1 className="text-4xl font-bold text-center mb-8">Libre Wallet Connector</h1>
 
-          <Card className="bg-gray-800 border-gray-700 p-6 mb-6">
+          <Card className="bg-gray-100 border-gray-700 p-6 mb-6">
             <div className="space-y-4">
               <div className="flex items-center space-x-4">
                 <Select value={selectedChain} onValueChange={handleChainChange}>
+                  <div className="w-20">Network</div>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select Chain" />
                   </SelectTrigger>
                   <SelectContent>
-                    {chains.map((chain) => (
+                    {supportedChains.map((chain) => (
                       <SelectItem key={chain.id} value={chain.id}>
                         {chain.name}
                       </SelectItem>
@@ -242,53 +272,88 @@ export default function Home() {
                   </SelectContent>
                 </Select>
               </div>
+              {isConnected
+                ? <p className="text-sm text-gray-700">Connected Address: {address}</p>
+                : <p className="text-sm" >Connected Address: <span className="text-red-600">Not Yet Connected</span></p>
+              }
 
-              {!handleConnect
-                ? <div className="w-full bg-red-600 p-2">Chain not supported yet</div>
-                : isInstalled
-                  ? <Button
-                    onClick={handleConnect}
-                    className="w-full bg-blue-600 hover:bg-blue-700"
-                  >
-                    <Wallet className="mr-2 h-4 w-4" />
-                    {isConnected ? 'Connected' : 'Connect Wallet'}
-                  </Button>
-                  : <div className="w-full bg-red-600 hover:bg-red-700 p-2">Wallet not found - <a href={downloadWalletLink} target="_blank" className="font-bold">get it at {downloadWalletLink}</a></div>
+              {isConnected &&
+                <Button
+                  onClick={handleDisconnect}
+                  className="w-full bg-red-600 hover:bg-red-700"
+                >
+                  Disconnect
+                </Button>
+              }
+
+              {isConnected &&
+                <>
+                  <div className="flex items-center space-x-4">
+                    <Select value={selectedAsset} onValueChange={handleAssetChange}>
+                      <div className="w-20">Asset</div>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select Asset" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={"USDC"}>
+                          USDC
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {selectedAsset && <p className="text-sm text-gray-700">Balance: {balance} {tokenName}</p>}
+                </>
+              }
+
+              {!isConnected &&
+                <>
+                  {!handleConnect
+                    ? <div className="w-full bg-red-600 p-2">Chain not supported yet</div>
+                    : isInstalled
+                      ? <Button
+                        onClick={handleConnect}
+                        className="w-full bg-blue-600 hover:bg-blue-700"
+                      >
+                        <Wallet className="mr-2 h-4 w-4" />
+                        {isConnected ? 'Connected' : 'Connect Wallet'}
+                      </Button>
+                      : <div className="w-full bg-red-600 hover:bg-red-700 p-2">Wallet not found - <a href={walletInfo.name} target="_blank" className="font-bold">get it at {walletInfo.name}</a></div>
+                  }
+                </>
               }
 
               {isConnected && (
                 <div className="space-y-4">
-                  <div className="bg-gray-700 rounded-lg p-4">
-                    <p className="text-sm text-gray-300">Connected Address</p>
-                    <p className="font-mono text-sm">{address}</p>
-                  </div>
+                  <div>Destination Address</div>
+                  <Input value={beneficiaryAddress} onChange={handleBeneficiaryAddressChange} />
 
-                  <div className="bg-gray-700 rounded-lg p-4">
-                    <p className="text-sm text-gray-300">{tokenName} Balance</p>
-                    <p className="text-xl font-bold">
-                      {balance} {tokenName}
-                    </p>
-                  </div>
-
+                  {/* <div>Amount to be Sent</div>
+                  <Input type="number" value={amount} onChange={handleAmountChange} min="0" step={0.01} /> */}
                   <Button
                     onClick={handlePay}
                     className="w-full bg-green-600 hover:bg-green-700"
+                    disabled={!isValidAddress}
                   >
                     <Send className="mr-2 h-4 w-4" />
                     Send Transaction
-                  </Button>
-
-                  <Button
-                    onClick={handleDisconnect}
-                    className="w-full bg-green-600 hover:bg-green-700"
-                  >
-                    Disconnect
                   </Button>
 
                 </div>
               )}
             </div>
           </Card>
+
+          <div>
+            <Button
+              onClick={() => setIsSupportedChainsVisible(prev => !prev)}
+              className="w-full bg-gray-800 hover:bg-gray-600"
+              disabled={!isValidAddress}
+            >
+              {isSupportedChainsVisible ? "Hide Supported Chains" : "Show Supported Chains"}
+            </Button>
+            {isSupportedChainsVisible && <SupportedChainsTable />}
+          </div>
+
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { SolanaManager } from "@/classes/solana-manager";
+import { SOLANA_ADDRESS_REGEX } from "@/app/config";
 
 // USDC contract addresses
 const USDC_ADDRESS = 'Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr';
@@ -47,14 +48,14 @@ export const useSolanaWallet = () => {
 
     }, [isSolanaConnected, solanaManager, solanaAddress]);
 
-    const handleSolanaPay = async (): Promise<string | undefined> => {
-        if (!solanaAddress) return;
+    const handleSolanaPay = async (beneficiaryAddress: string): Promise<string | undefined> => {
+        if (!beneficiaryAddress || !SOLANA_ADDRESS_REGEX.test(beneficiaryAddress)) return;
 
         setIsSolanaLoading(true);
 
         try {
             return solanaManager?.createTransaction(
-                solanaAddress,
+                beneficiaryAddress,
                 receiverAddress,
                 USDC_ADDRESS,
                 Number("10")

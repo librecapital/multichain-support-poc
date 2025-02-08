@@ -35,7 +35,7 @@ const USDC_ADDRESS = {
     43113: "0x5425890298aed601595a70ab815c96711a31bc65"
 }
 
-const getContract = async (walletProvider: ethers.Eip1193Provider, chain: number) => {
+const getAssetContract = async (walletProvider: ethers.Eip1193Provider, chain: number) => {
     const ethersProvider = new ethers.BrowserProvider(walletProvider);
     const signer = await ethersProvider.getSigner();
     const abi: InterfaceAbi = USDC_ABI;
@@ -58,7 +58,7 @@ export const useEvmWallet = () => {
 
         const checkEnoughBalance = async () => {
             await switchNetwork(chain);
-            const contract = await getContract(walletProvider, chain);
+            const contract = await getAssetContract(walletProvider, chain);
             const balance = await contract.balanceOf(evmAddress);
             const formattedBalance = Number(formatUnits(balance, 6));
 
@@ -68,16 +68,16 @@ export const useEvmWallet = () => {
         checkEnoughBalance();
     }, [evmAddress, walletProvider, chain]);
 
-    const handleEvmPay = async (): Promise<string | undefined> => {
+    const handleEvmPay = async (beneficiaryAddress: `0x${string}`): Promise<string | undefined> => {
         if (!isEvmConnected || !walletProvider) return;
 
         try {
             setIsEvmLoading(true);
             await switchNetwork(chain);
             const parsedValue = parseUnits("0", 6);
-            const contract = await getContract(walletProvider, chain);
+            const contract = await getAssetContract(walletProvider, chain);
 
-            const tx = await contract.transfer(evmAddress, parsedValue);
+            const tx = await contract.transfer(beneficiaryAddress, parsedValue);
             const receipt = await tx.wait();
 
             return receipt.hash as unknown as string;

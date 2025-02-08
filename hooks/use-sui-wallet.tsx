@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useConnectWallet, useCurrentAccount, useDisconnectWallet, useSignAndExecuteTransaction, useSuiClient, useWallets } from "@mysten/dapp-kit";
 import { CoinStruct } from "@mysten/sui/client";
 import { Inputs, Transaction } from "@mysten/sui/transactions";
+import { SUI_ADDRESS_REGEX } from "@/app/config";
 
 export const useSuiWallet = () => {
     const wallets = useWallets();
@@ -57,8 +58,8 @@ export const useSuiWallet = () => {
         setSuiBalance(null);
     };
 
-    const handleSuiPay = async (): Promise<string | undefined> => {
-        if (!suiAddress) return;
+    const handleSuiPay = async (beneficiaryAddress: string): Promise<string | undefined> => {
+        if (!suiAddress || !SUI_ADDRESS_REGEX.test(beneficiaryAddress)) return;
         setIsSuiLoading(true);
         try {
             const tx = await buildTransaction();

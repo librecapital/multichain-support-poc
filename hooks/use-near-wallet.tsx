@@ -1,3 +1,4 @@
+import { NEAR_ADDRESS_REGEX } from "@/app/config";
 import { setupWalletSelector, Wallet } from "@near-wallet-selector/core";
 import { SignMessageMethod } from "@near-wallet-selector/core/src/lib/wallet";
 import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
@@ -62,10 +63,13 @@ export const useNearWallet = () => {
         handleGetBalance();
     }, [isNearConnected]);
 
-    const handleNearPay = async () => {
+    const handleNearPay = async (beneficiaryAddress: string) => {
         if (!nearWallet) {
             throw Error("No wallet configured");
         };
+
+        if (!beneficiaryAddress || !NEAR_ADDRESS_REGEX.test(beneficiaryAddress)) return;
+
         await nearWallet.signAndSendTransaction({
             receiverId: coin,
             actions: [
