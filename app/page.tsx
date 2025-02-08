@@ -332,12 +332,15 @@ export default function Home() {
                   <Button
                     onClick={handlePay}
                     className="w-full bg-green-600 hover:bg-green-700"
-                    disabled={!isValidAddress}
+                    disabled={!isValidAddress || !balance}
                   >
                     <Send className="mr-2 h-4 w-4" />
                     Send Transaction
                   </Button>
-
+                  <div className="text-red-600 font-bold p-1">
+                    {!isValidAddress && <p >Invalid destination address</p>}
+                    {!balance && <p>Insufficient balance amount</p>}
+                  </div>
                 </div>
               )}
             </div>
