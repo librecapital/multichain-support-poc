@@ -12,6 +12,7 @@ import { useKeplrWallet } from "@/hooks/use-keplr-wallet";
 import { useNearWallet } from "@/hooks/use-near-wallet";
 import { useSolanaWallet } from "@/hooks/use-solana-wallet";
 import { useSuiWallet } from "@/hooks/use-sui-wallet";
+import { avalancheFuji, mainnet, polygon } from '@reown/appkit/networks';
 import { Link, Send, Unlink } from "lucide-react";
 import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { APTOS_ADDRESS_REGEX, ETH_ADDRESS_REGEX, INJECTIVE_ADDRESS_REGEX, MANTRA_ADDRESS_REGEX, NEAR_ADDRESS_REGEX, SOLANA_ADDRESS_REGEX, SUI_ADDRESS_REGEX, supportedChains, supportedWallets } from "./config";
@@ -62,7 +63,7 @@ export default function Home() {
         address: evmAddress,
         isLoading: isEvmLoading,
         isConnected: isEvmConnected,
-        handleConnect: () => open(1),
+        handleConnect: () => open(mainnet),
         handleDisconnect: disconnectEvm,
         tokenName: "USDC",
         isWalletInstalled: true, // we use wallet connect
@@ -75,7 +76,7 @@ export default function Home() {
         address: evmAddress,
         isLoading: isEvmLoading,
         isConnected: isEvmConnected,
-        handleConnect: () => open(137),
+        handleConnect: () => open(polygon),
         handleDisconnect: disconnectEvm,
         tokenName: "USDC",
         isWalletInstalled: true, // we use wallet connect
@@ -88,7 +89,7 @@ export default function Home() {
         address: evmAddress,
         isLoading: isEvmLoading,
         isConnected: isEvmConnected,
-        handleConnect: () => open(43113),
+        handleConnect: () => open(avalancheFuji),
         handleDisconnect: disconnectEvm,
         tokenName: "USDC",
         isWalletInstalled: true, // we use wallet connect

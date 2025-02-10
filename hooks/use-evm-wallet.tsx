@@ -1,12 +1,8 @@
 import { ethers, formatUnits, InterfaceAbi, parseUnits } from "ethers";
 import { useEffect, useState } from "react";
 
-import {
-    useDisconnect as useEvmDisconnect, useWeb3Modal as useEvmWeb3Modal,
-    useWeb3ModalAccount as useEvmWeb3ModalAccount,
-    useSwitchNetwork,
-    useWeb3ModalProvider
-} from "@web3modal/ethers/react";
+import { AppKitNetwork, mainnet } from "@reown/appkit/networks";
+import { useAppKit, useAppKitAccount, useAppKitNetwork, useAppKitProvider, useDisconnect } from '@reown/appkit/react';
 
 const USDC_ABI = [
     {
@@ -35,29 +31,29 @@ const USDC_ADDRESS = {
     43113: "0x5425890298aed601595a70ab815c96711a31bc65"
 }
 
-const getAssetContract = async (walletProvider: ethers.Eip1193Provider, chain: number) => {
+const getAssetContract = async (walletProvider: ethers.Eip1193Provider, chain: AppKitNetwork) => {
     const ethersProvider = new ethers.BrowserProvider(walletProvider);
     const signer = await ethersProvider.getSigner();
     const abi: InterfaceAbi = USDC_ABI;
 
-    return new ethers.Contract(USDC_ADDRESS[chain as keyof typeof USDC_ADDRESS], abi, signer);
+    return new ethers.Contract(USDC_ADDRESS[chain.id as keyof typeof USDC_ADDRESS], abi, signer);
 };
 
 export const useEvmWallet = () => {
-    const { walletProvider } = useWeb3ModalProvider();
-    const { address: evmAddress, isConnected: isEvmConnected } = useEvmWeb3ModalAccount();
+    const { walletProvider } = useAppKitProvider<ethers.Eip1193Provider>('eip155')
+    const { address: evmAddress, isConnected: isEvmConnected } = useAppKitAccount();
     const [evmBalance, setEvmBalance] = useState<number | null>(null);
-    const { open: openEvmModal } = useEvmWeb3Modal();
-    const { switchNetwork } = useSwitchNetwork();
-    const { disconnect: disconnectEvm } = useEvmDisconnect();
+    const { open: openEvmModal } = useAppKit();
+    const { switchNetwork } = useAppKitNetwork();
+    const { disconnect: disconnectEvm } = useDisconnect();
     const [isEvmLoading, setIsEvmLoading] = useState(false);
-    const [chain, setChain] = useState(1);
+    const [chain, setChain] = useState<AppKitNetwork>(mainnet);
 
     useEffect(() => {
         if (!walletProvider) return;
 
         const checkEnoughBalance = async () => {
-            await switchNetwork(chain);
+            switchNetwork(chain);
             const contract = await getAssetContract(walletProvider, chain);
             const balance = await contract.balanceOf(evmAddress);
             const formattedBalance = Number(formatUnits(balance, 6));
@@ -73,7 +69,7 @@ export const useEvmWallet = () => {
 
         try {
             setIsEvmLoading(true);
-            await switchNetwork(chain);
+            switchNetwork(chain);
             const parsedValue = parseUnits("0", 6);
             const contract = await getAssetContract(walletProvider, chain);
 
@@ -88,7 +84,7 @@ export const useEvmWallet = () => {
         }
     };
 
-    const open = async (chain: number) => {
+    const open = async (chain: AppKitNetwork) => {
         await openEvmModal();
         setChain(chain);
     }

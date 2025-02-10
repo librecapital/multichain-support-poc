@@ -1,7 +1,5 @@
-import {
-    createWeb3Modal,
-    defaultConfig as defaultEvmConfig,
-} from "@web3modal/ethers/react";
+import { avalancheFuji, mainnet, polygon } from '@reown/appkit/networks';
+import { createAppKit } from '@reown/appkit/react';
 
 // Get projectId from https://cloud.walletconnect.com
 const projectId = "c8e79bc1b0f5689eebafc4f97b12dd5d";
@@ -13,44 +11,16 @@ const commonMetadata = {
     icons: ["https://avatars.mywebsite.com/"],
 };
 
-const evmChains = [
-    {
-        chainId: 1,
-        name: "Ethereum",
-        currency: "ETH",
-        explorerUrl: "https://etherscan.io",
-        rpcUrl: "https://cloudflare-eth.com",
-    },
-    {
-        chainId: 137,
-        name: "Polygon",
-        currency: "MATIC",
-        explorerUrl: "https://polygonscan.com",
-        rpcUrl: "https://polygon-rpc.com"
-    },
-    {
-        chainId: 43113,
-        name: "Avalanche FUJI C-Chain TESTNET",
-        currency: "AVAX",
-        explorerUrl: "https://testnet.snowtrace.io",
-        rpcUrl: "https://api.avax-test.network/ext/bc/C/rpc"
-    }
-];
-
-// Create EVM configuration
-const evmConfig = defaultEvmConfig({
+createAppKit({
+    projectId: projectId,
     metadata: commonMetadata,
+    networks: [mainnet, polygon, avalancheFuji],
     enableEIP6963: true,
     enableInjected: true,
     enableCoinbase: true,
-    rpcUrl: "...", // Used for the Coinbase SDK
-    defaultChainId: 1, // Used for the Coinbase SDK
-});
-
-createWeb3Modal({
-    projectId: projectId,
-    chains: [...evmChains] as any,
-    ethersConfig: evmConfig,
-    enableAnalytics: false,
+    defaultNetwork: mainnet, // Used for the Coinbase SDK
+    features: {
+        analytics: false // Optional - defaults to your Cloud configuration
+    }
 });
 
