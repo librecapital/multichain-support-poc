@@ -276,7 +276,7 @@ export default function Home() {
               </div>
               {isInstalled && isConnected
                 ? <div className="flex justify-between">
-                  <div className="text-sm text-gray-700">Connected Address: {address}</div>
+                  <div className="text-sm text-gray-700">Connected Address: <span className="cursor-pointer" onClick={handleConnect}>{address}</span></div>
                   <div className="flex cursor-pointer hover:text-blue-800" onClick={handleDisconnect}><Unlink className="mr-2 h-4 w-4" />Disconnect</div>
                 </div>
                 : <div className="flex justify-between">
