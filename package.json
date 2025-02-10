@@ -15,7 +15,7 @@
     "@mysten/dapp-kit": "0.14.50",
     "@near-wallet-selector/my-near-wallet": "8.9.16",
     "@radix-ui/react-select": "2.0.0",
-    "@reown/appkit-adapter-ethers": "1.6.0",
+    "@reown/appkit-adapter-ethers": "1.6.8",
     "@solana/web3.js": "1.98.0",
     "autoprefixer": "10.4.20",
     "class-variance-authority": "0.7.1",
