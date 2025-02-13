@@ -23,7 +23,6 @@ export const useSuiWallet = () => {
     const [isSuiWalletInstalled, setIsSuiWalletInstalled] = useState<boolean>(false);
 
     const connectSui = async () => {
-        if (!isSuiWalletInstalled) return;
         const walletSui = wallets.find((wallet: {name: string}) => wallet.name === "Sui Wallet");
         if (!walletSui) {
             setIsSuiWalletInstalled(false);
