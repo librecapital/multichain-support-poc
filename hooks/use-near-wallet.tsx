@@ -89,6 +89,25 @@ export const useNearWallet = () => {
         });
     }
 
+    const signMessage = async (message: string): Promise<{ signature: string; publicKey: string }> => {
+        if (!nearWallet) {
+            throw new Error("NEAR wallet not initialized");
+        }
+        if (!nearAddress) {
+            throw new Error("Not connected to NEAR wallet");
+        }
+        
+        const result = await nearWallet.signMessage({
+            message: new TextEncoder().encode(message),
+            receiver: nearAddress,
+        });
+        
+        return {
+            signature: Buffer.from(result.signature).toString('base64'),
+            publicKey: result.publicKey
+        };
+    };
+
     const disconnectNear = async () => {
         if (!nearWallet) {
             throw Error("No wallet configured");
@@ -105,6 +124,7 @@ export const useNearWallet = () => {
         nearAddress,
         nearBalance,
         handleNearPay,
+        signMessage,
         nearWallet
     };
 };

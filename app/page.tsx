@@ -24,23 +24,24 @@ export default function Home() {
   const [selectedAsset, setSelectedAsset] = useState<string>('USDC');
   const [beneficiaryAddress, setBeneficiaryAddress] = useState<string>('');
   const [amount, setAmount] = useState<number>(0);
+  const [message, setMessage] = useState<string>('');
   const [isInstalled, setIsInstalled] = useState(false);
   const [isSupportedChainsVisible, setIsSupportedChainsVisible] = useState<boolean>(false);
   const [isAddressSupported, setIsAddressSupported] = useState(true);
 
   const {
     isEvmLoading, evmBalance, evmAddress, isEvmConnected,
-    open, handleEvmPay, disconnectEvm
+    open, handleEvmPay, disconnectEvm, signMessage: signEvmMessage
   } = useEvmWallet();
 
   const {
     isSolanaLoading, solanaBalance, solanaAddress, isSolanaConnected, solanaManager, isPhantomInstalled,
-    handleSolanaPay, connectSolana, disconnectSolana
+    handleSolanaPay, connectSolana, disconnectSolana, signMessage: signSolanaMessage
   } = useSolanaWallet();
 
   const {
     isKeplrLoading, keplrBalance, keplrAddress, isKeplrConnected, isKeplrInstalled,
-    handleKeplrPay, connectKeplr, disconnectKeplr, keplrToken
+    handleKeplrPay, connectKeplr, disconnectKeplr, keplrToken, signMessage: signKeplrMessage
   } = useKeplrWallet();
 
   const {
@@ -52,15 +53,16 @@ export default function Home() {
   } = useAptosWallet();
 
   const {
-    connectNear, disconnectNear, isNearConnected, nearAddress, nearBalance, handleNearPay, nearWallet
+    connectNear, disconnectNear, isNearConnected, nearAddress, nearBalance, handleNearPay, nearWallet, signMessage: signNearMessage
   } = useNearWallet();
 
   const {
-    isConnected, handleConnect, handleDisconnect, address, balance, handlePay, tokenName, isWalletInstalled, walletInfo, isLoading, isValidAddress,
+    isConnected, handleConnect, handleDisconnect, address, balance, handlePay, tokenName, isWalletInstalled, walletInfo, isLoading, isValidAddress, handleSignMessage,
   } = useMemo(() => {
     switch (selectedChain) {
       case "ethereum": return {
         handlePay: () => ETH_ADDRESS_REGEX.test(beneficiaryAddress) && handleEvmPay(beneficiaryAddress as `0x${string}`),
+        handleSignMessage: () => signEvmMessage(message),
         isValidAddress: ETH_ADDRESS_REGEX.test(beneficiaryAddress),
         balance: evmBalance,
         address: evmAddress,
@@ -74,6 +76,7 @@ export default function Home() {
       };
       case "polygon": return {
         handlePay: () => ETH_ADDRESS_REGEX.test(beneficiaryAddress) && handleEvmPay(beneficiaryAddress as `0x${string}`),
+        handleSignMessage: () => signEvmMessage(message),
         isValidAddress: ETH_ADDRESS_REGEX.test(beneficiaryAddress),
         balance: evmBalance,
         address: evmAddress,
@@ -87,6 +90,7 @@ export default function Home() {
       };
       case "avalanche": return {
         handlePay: () => ETH_ADDRESS_REGEX.test(beneficiaryAddress) && handleEvmPay(beneficiaryAddress as `0x${string}`),
+        handleSignMessage: () => signEvmMessage(message),
         isValidAddress: ETH_ADDRESS_REGEX.test(beneficiaryAddress),
         balance: evmBalance,
         address: evmAddress,
@@ -100,6 +104,7 @@ export default function Home() {
       };
       case "solana": return {
         handlePay: () => handleSolanaPay(beneficiaryAddress),
+        handleSignMessage: () => signSolanaMessage(message),
         isValidAddress: SOLANA_ADDRESS_REGEX.test(beneficiaryAddress),
         balance: solanaBalance,
         address: solanaAddress,
@@ -113,6 +118,7 @@ export default function Home() {
       };
       case "mantra": return {
         handlePay: () => handleKeplrPay(beneficiaryAddress),
+        handleSignMessage: () => signKeplrMessage(message),
         isValidAddress: MANTRA_ADDRESS_REGEX.test(beneficiaryAddress),
         balance: keplrBalance,
         address: keplrAddress,
@@ -126,6 +132,7 @@ export default function Home() {
       };
       case "injective": return {
         handlePay: () => handleKeplrPay(beneficiaryAddress),
+        handleSignMessage: () => signKeplrMessage(message),
         isValidAddress: INJECTIVE_ADDRESS_REGEX.test(beneficiaryAddress),
         balance: keplrBalance,
         address: keplrAddress,
@@ -139,6 +146,7 @@ export default function Home() {
       };
       case "sui": return {
         handlePay: () => handleSuiPay(beneficiaryAddress),
+        handleSignMessage: () => null,
         isValidAddress: SUI_ADDRESS_REGEX.test(beneficiaryAddress),
         balance: suiBalance,
         address: suiAddress,
@@ -152,6 +160,7 @@ export default function Home() {
       };
       case "near": return {
         handlePay: () => handleNearPay(beneficiaryAddress),
+        handleSignMessage: () => signNearMessage(message),
         isValidAddress: NEAR_ADDRESS_REGEX.test(beneficiaryAddress),
         balance: nearBalance,
         address: nearAddress,
@@ -164,6 +173,7 @@ export default function Home() {
       };
       case "aptos": return {
         handlePay: () => handleAptosPay(beneficiaryAddress),
+        handleSignMessage: () => null,
         isValidAddress: APTOS_ADDRESS_REGEX.test(beneficiaryAddress),
         balance: aptosBalance,
         address: aptosAddress,
@@ -218,7 +228,12 @@ export default function Home() {
     nearAddress,
     nearBalance,
     handleNearPay,
-    nearWallet
+    nearWallet,
+    message,
+    signEvmMessage,
+    signSolanaMessage,
+    signKeplrMessage,
+    signNearMessage
   ]);
 
   const handleBeneficiaryAddressChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -228,6 +243,10 @@ export default function Home() {
   const handleAmountChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);
     setAmount(isNaN(value) ? 0 : Number(value));
+  }
+
+  const handleMessageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setMessage(e.target.value);
   }
 
   useEffect(() => {
@@ -316,21 +335,21 @@ export default function Home() {
                     <div className="w-[100px] font-bold">Amount</div>
                     <Input type="number" value={amount} onChange={handleAmountChange} min="0" step={0.01} readOnly disabled />
                   </div>
-                </>
-              }
 
-              {!handleConnect && <div className="w-full text-red-600 p-2">Chain not supported yet</div>}
+                  <div className="flex items-center">
+                    <div className="w-[100px] font-bold">Message to Sign</div>
+                    <Input type="text" value={message} onChange={handleMessageChange} />
+                  </div>
 
-              {!isInstalled && walletInfo &&
-                <div className="w-full bg-red-300 p-2 text-red-800">
-                  <p className="font-bold">Wallet not found!</p>
-                  <p className="font-mono underline"><a href={walletInfo.website} target="_blank" className="font-bold hover:text-blue-600">Click here to get {walletInfo.name}</a></p>
-                </div>
-              }
+                  <Button
+                    onClick={() => handleSignMessage()}
+                    disabled={!message}
+                    className="w-full"
+                  >
+                    Sign Message
+                  </Button>
 
-              {isConnected && (
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center">
                     <div className="w-[100px] font-bold">Send To</div>
                     <div className="w-auto">
                       <Select value={selectedChain} onValueChange={handleChainChange} disabled>
@@ -365,8 +384,18 @@ export default function Home() {
                     {!balance && <p>Insufficient balance amount</p>}
                     {!isAddressSupported && <p>Address not supported. Please switch account</p>}
                   </div>
+                </>
+              }
+
+              {!handleConnect && <div className="w-full text-red-600 p-2">Chain not supported yet</div>}
+
+              {!isInstalled && walletInfo &&
+                <div className="w-full bg-red-300 p-2 text-red-800">
+                  <p className="font-bold">Wallet not found!</p>
+                  <p className="font-mono underline"><a href={walletInfo.website} target="_blank" className="font-bold hover:text-blue-600">Click here to get {walletInfo.name}</a></p>
                 </div>
-              )}
+              }
+
             </div>
           </Card>
 
