@@ -12,7 +12,7 @@ export type SupportedWallets = {
 
 export interface WalletManagementProps {
     selectedChain: string;
-    currentAddress: string;
+    currentAddress: string | undefined | null;
     onAddressChange: (isSupported: boolean) => void;
 }
 

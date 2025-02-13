@@ -260,10 +260,10 @@ export default function Home() {
           <h1 className="text-4xl font-bold text-center mb-8">Libre Gateway PoC</h1>
           <WalletManagement
             selectedChain={selectedChain}
-            currentAddress={beneficiaryAddress}
+            currentAddress={address}
             onAddressChange={setIsAddressSupported}
           />
-          <Card className="md:bg-gray-100 md:border-gray-700 md:p-6 mb-6 bg-transparent border-transparent">
+          <Card className="md:bg-gray-100 md:border-gray-700 md:p-6 mb-6 bg-transparent border-transparent mt-4">
             <div className="space-y-4">
               <div className="flex items-center">
                 <div className="w-[100px] font-bold">From</div>
