@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAptosWallet } from "@/hooks/use-aptos-wallet";
 
 import { Input } from "@/components/ui/input";
+import WalletManagement from "@/components/ui/wallet-management";
 import { useEvmWallet } from '@/hooks/use-evm-wallet';
 import { useKeplrWallet } from "@/hooks/use-keplr-wallet";
 import { useNearWallet } from "@/hooks/use-near-wallet";
@@ -25,6 +26,8 @@ export default function Home() {
   const [amount, setAmount] = useState<number>(0);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isSupportedChainsVisible, setIsSupportedChainsVisible] = useState<boolean>(false);
+  const [isAddressSupported, setIsAddressSupported] = useState(true);
+
   const {
     isEvmLoading, evmBalance, evmAddress, isEvmConnected,
     open, handleEvmPay, disconnectEvm
@@ -255,7 +258,11 @@ export default function Home() {
       <div className="container mx-auto px-4 py-8 w-full">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-4xl font-bold text-center mb-8">Libre Gateway PoC</h1>
-
+          <WalletManagement
+            selectedChain={selectedChain}
+            currentAddress={beneficiaryAddress}
+            onAddressChange={setIsAddressSupported}
+          />
           <Card className="md:bg-gray-100 md:border-gray-700 md:p-6 mb-6 bg-transparent border-transparent">
             <div className="space-y-4">
               <div className="flex items-center">
@@ -303,7 +310,7 @@ export default function Home() {
                       </Select>
                     </div>
                   </div>
-                  {selectedAsset && <p className="text-sm text-gray-700">Balance: {balance} {tokenName}</p>}
+                  {selectedAsset && isAddressSupported && <p className="text-sm text-gray-700">Balance: {balance} {tokenName}</p>}
 
                   <div className="flex items-center">
                     <div className="w-[100px] font-bold">Amount</div>
@@ -348,7 +355,7 @@ export default function Home() {
                   <Button
                     onClick={handlePay}
                     className="w-full bg-green-600 hover:bg-green-700"
-                    disabled={!isValidAddress || !balance}
+                    disabled={!isValidAddress || !balance || !isAddressSupported}
                   >
                     <Send className="mr-2 h-4 w-4" />
                     Send Transaction
@@ -356,6 +363,7 @@ export default function Home() {
                   <div className="text-red-600 font-bold p-1">
                     {!isValidAddress && <p >Invalid destination address</p>}
                     {!balance && <p>Insufficient balance amount</p>}
+                    {!isAddressSupported && <p>Address not supported. Please switch account</p>}
                   </div>
                 </div>
               )}
