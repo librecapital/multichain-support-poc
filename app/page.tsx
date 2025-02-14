@@ -49,7 +49,7 @@ export default function Home() {
   } = useSuiWallet();
 
   const {
-    connectAptos, disconnectAptos, aptosAddress, aptosConnected, aptosBalance, handleAptosPay, isAptosLoading
+    connectAptos, disconnectAptos, aptosAddress, aptosConnected, aptosBalance, handleAptosPay, isAptosLoading, handleSignMessage: signAptosMessage
   } = useAptosWallet();
 
   const {
@@ -173,7 +173,7 @@ export default function Home() {
       };
       case "aptos": return {
         handlePay: () => handleAptosPay(beneficiaryAddress),
-        handleSignMessage: () => null,
+        handleSignMessage: () => signAptosMessage(message),
         isValidAddress: APTOS_ADDRESS_REGEX.test(beneficiaryAddress),
         balance: aptosBalance,
         address: aptosAddress,
@@ -234,7 +234,8 @@ export default function Home() {
     signSolanaMessage,
     signKeplrMessage,
     signNearMessage,
-    signSuiMessage
+    signSuiMessage,
+    signAptosMessage
   ]);
 
   const handleBeneficiaryAddressChange = (e: ChangeEvent<HTMLInputElement>) => {

@@ -4,10 +4,11 @@ import { useWallet, WalletName } from "@aptos-labs/wallet-adapter-react";
 import { useEffect, useState } from "react";
 
 export const useAptosWallet = () => {
-    const { account, connected: aptosConnected, signAndSubmitTransaction, connect, disconnect } = useWallet();
+    const { account, connected: aptosConnected, signAndSubmitTransaction, signMessage, connect, disconnect } = useWallet();
     const [aptosAddress, setAptosAddress] = useState<string | undefined>(undefined);
     const [aptosBalance, setAptosBalance] = useState<number | null>(null);
     const [isAptosLoading, setIsAptosLoading] = useState<boolean>(false);
+    const [isSigningMessage, setIsSigningMessage] = useState<boolean>(false);
     const [isPetraInstalled, setIsPetraInstalled] = useState<boolean>(false);
 
     const config = new AptosConfig({ network: Network.TESTNET });
@@ -74,6 +75,23 @@ export const useAptosWallet = () => {
         }
     };
 
+    const handleSignMessage = async (message: string): Promise<string | undefined> => {
+        if (!aptosAddress || !message) return;
+        setIsSigningMessage(true);
+        try {
+            const response = await signMessage({
+                message: message,
+                nonce: crypto.randomUUID()
+            });
+            return response.signature.toString();
+        } catch (error) {
+            console.error("Error signing message:", error);
+            throw error;
+        } finally {
+            setIsSigningMessage(false);
+        }
+    };
+
     return {
         isPetraInstalled,
         connectAptos,
@@ -82,6 +100,8 @@ export const useAptosWallet = () => {
         aptosConnected,
         aptosBalance,
         handleAptosPay,
-        isAptosLoading
+        handleSignMessage,
+        isAptosLoading,
+        isSigningMessage
     };
 };
