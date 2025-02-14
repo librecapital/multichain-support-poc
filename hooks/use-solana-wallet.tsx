@@ -80,6 +80,13 @@ export const useSolanaWallet = () => {
         }
     };
 
+    const signMessage = async (message: string): Promise<{ signature: string; publicKey: string }> => {
+        if (!solanaManager) {
+            throw new Error("Solana manager not initialized");
+        }
+        return await solanaManager.signMessage(message);
+    };
+
     return {
         isPhantomInstalled,
         solanaManager,
@@ -88,6 +95,7 @@ export const useSolanaWallet = () => {
         solanaAddress,
         isSolanaConnected,
         handleSolanaPay,
+        signMessage,
         connectSolana,
         disconnectSolana,
     };

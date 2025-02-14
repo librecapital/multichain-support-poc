@@ -19,13 +19,28 @@ export const SupportedChainsTable = () => {
                             <tr key={chain.id} className="hover:bg-gray-50">
                                 <td className="px-6 py-4 text-sm text-gray-800">{chain.name}</td>
                                 <td className="px-6 py-4 text-sm">
-                                    <a
-                                        href={chain.wallet.website}
-                                        target="_blank"
-                                        className="text-blue-600 hover:text-blue-800 hover:underline"
-                                    >
-                                        {chain.wallet.name}
-                                    </a>
+                                    {Array.isArray(chain.wallet) ? (
+                                        <div className="space-y-1">
+                                            {chain.wallet.map((wallet) => (
+                                                <a
+                                                    key={wallet.name}
+                                                    href={wallet.website}
+                                                    target="_blank"
+                                                    className="block text-blue-600 hover:text-blue-800 hover:underline"
+                                                >
+                                                    {wallet.name}
+                                                </a>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <a
+                                            href={chain.wallet.website}
+                                            target="_blank"
+                                            className="text-blue-600 hover:text-blue-800 hover:underline"
+                                        >
+                                            {chain.wallet.name}
+                                        </a>
+                                    )}
                                 </td>
                             </tr>
                         ))}

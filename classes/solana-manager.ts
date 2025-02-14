@@ -14,6 +14,7 @@ type PhantomProvider = {
     disconnect: () => Promise<void>;
     on: (event: string, callback: (args: any) => void) => void;
     signAndSendTransaction: (transaction: Transaction, options?: SendOptions) => Promise<{ signature: TransactionSignature }>;
+    signMessage: (message: Uint8Array) => Promise<{ signature: Uint8Array; publicKey: PublicKey }>;
 }
 
 declare global {
@@ -208,5 +209,20 @@ export class SolanaManager {
 
         console.log("Transaction sent successfully. Signature:", signature);
         return signature;
+    }
+
+    public async signMessage(message: string): Promise<{ signature: string; publicKey: string }> {
+        const provider = SolanaManager.provider;
+        if (!provider) {
+            throw new Error("Phantom wallet not found");
+        }
+
+        const encodedMessage = new TextEncoder().encode(message);
+        const signedMessage = await provider.signMessage(encodedMessage);
+        
+        return {
+            signature: Buffer.from(signedMessage.signature).toString('base64'),
+            publicKey: signedMessage.publicKey.toString()
+        };
     }
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { useConnectWallet, useCurrentAccount, useDisconnectWallet, useSignAndExecuteTransaction, useSuiClient, useWallets } from "@mysten/dapp-kit";
+import { useConnectWallet, useCurrentAccount, useDisconnectWallet, useSignAndExecuteTransaction, useSuiClient, useWallets, useSignPersonalMessage } from "@mysten/dapp-kit";
 import { CoinStruct } from "@mysten/sui/client";
 import { Inputs, Transaction } from "@mysten/sui/transactions";
 import { SUI_ADDRESS_REGEX } from "@/app/config";
@@ -12,6 +12,7 @@ export const useSuiWallet = () => {
     const currentAccount = useCurrentAccount();
     const signAndExecuteTransaction = useSignAndExecuteTransaction();
     const client = useSuiClient();
+    const signMessage = useSignPersonalMessage();
     const sui_default_coin: string = "0x2::sui::SUI";
     const coin: string = "0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC";
     const amount = 1;
@@ -20,6 +21,7 @@ export const useSuiWallet = () => {
     const [suiBalance, setSuiBalance] = useState<number | null>(null);
     const [isSuiConnected, setIsSuiConnected] = useState<boolean>(false);
     const [isSuiLoading, setIsSuiLoading] = useState(false);
+    const [isSigningMessage, setIsSigningMessage] = useState(false);
     const [isSuiWalletInstalled, setIsSuiWalletInstalled] = useState<boolean>(false);
 
     const connectSui = async () => {
@@ -124,6 +126,21 @@ export const useSuiWallet = () => {
         return tx.object(Inputs.ObjectRef({ digest: coin.digest, objectId: coin.coinObjectId, version: coin.version }));
     }
 
+    const handleSignMessage = async (message: string): Promise<string | undefined> => {
+        setIsSigningMessage(true);
+        try {
+            const response = await signMessage.mutateAsync({
+                message: new TextEncoder().encode(message)
+            });
+            return response.signature;
+        } catch (error) {
+            console.error("Error signing message:", error);
+            throw error;
+        } finally {
+            setIsSigningMessage(false);
+        }
+    };
+
     return {
         suiAddress,
         connectSui,
@@ -131,7 +148,9 @@ export const useSuiWallet = () => {
         isSuiConnected,
         suiBalance,
         handleSuiPay,
+        handleSignMessage,
         isSuiLoading,
+        isSigningMessage,
         isSuiWalletInstalled
     };
 };

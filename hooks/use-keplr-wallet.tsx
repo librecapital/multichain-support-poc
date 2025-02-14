@@ -77,6 +77,13 @@ export const useKeplrWallet = () => {
         }
     };
 
+    const signMessage = async (message: string): Promise<{ signature: string; pubKey: string }> => {
+        if (!keplrManager) {
+            throw new Error("Keplr manager not initialized");
+        }
+        return await keplrManager.signMessage(message);
+    };
+
     return {
         isKeplrInstalled,
         keplrManager,
@@ -85,6 +92,7 @@ export const useKeplrWallet = () => {
         keplrAddress,
         isKeplrConnected,
         handleKeplrPay,
+        signMessage,
         connectKeplr,
         disconnectKeplr,
         keplrToken

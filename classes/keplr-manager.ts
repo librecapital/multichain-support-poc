@@ -70,4 +70,29 @@ export class KeplrManager {
         const response = await this.stargateClient?.sendTokens(fromAddress, toAddress, coins(amount, denom), "auto");
         return response?.transactionHash;
     }
+
+    public async signMessage(message: string): Promise<{ signature: string; pubKey: string }> {
+        if (!this.chain) {
+            throw Error("No chain defined");
+        }
+        if (!this.keplr) {
+            throw Error("Keplr not initialized");
+        }
+        
+        const key = await this.keplr.getKey(this.chain);
+        if (!key) {
+            throw Error("No key found");
+        }
+
+        const signResponse = await this.keplr.signArbitrary(
+            this.chain,
+            key.bech32Address,
+            message
+        );
+
+        return {
+            signature: signResponse.signature,
+            pubKey: signResponse.pub_key.value
+        };
+    }
 }

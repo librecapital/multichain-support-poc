@@ -2,6 +2,7 @@ import { NEAR_ADDRESS_REGEX } from "@/app/config";
 import { setupWalletSelector, Wallet } from "@near-wallet-selector/core";
 import { SignMessageMethod } from "@near-wallet-selector/core/src/lib/wallet";
 import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
+import { randomBytes } from 'crypto';
 import { connect, Near } from "near-api-js";
 import { useEffect, useState } from "react";
 
@@ -89,6 +90,24 @@ export const useNearWallet = () => {
         });
     }
 
+    // The return value is not needed cause since we are using my-near-wallet the user will be redirected first to the wallet page for signing 
+    // and then redirected back to the poc page. The signature and the public key will be available in the url after the signing: 
+    // http://localhost:3000/#accountId=test1012.testnet&signature=%2BrdE7oMuh%2FgsXjxj2jxCAuRT7N5WpMAi4hdMqlVcWYYm9ajikcTs84YX6pVdjne%2FPlkls2Tn0QxJI81j%2BMTHCQ%3D%3D&publicKey=ed25519%3AAiunGbtGTzQLyv58rJWgnz3xMGP9RUQmd6DQLuGp7w4a&
+    const signMessage = async (message: string): Promise<void> => {
+        if (!nearWallet) {
+            throw new Error("NEAR wallet not initialized");
+        }
+        if (!nearAddress) {
+            throw new Error("Not connected to NEAR wallet");
+        }
+
+        await nearWallet.signMessage({
+            message: message,
+            recipient: nearAddress,
+            nonce: randomBytes(32)
+        });
+    };
+
     const disconnectNear = async () => {
         if (!nearWallet) {
             throw Error("No wallet configured");
@@ -105,6 +124,7 @@ export const useNearWallet = () => {
         nearAddress,
         nearBalance,
         handleNearPay,
+        signMessage,
         nearWallet
     };
 };

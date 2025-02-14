@@ -84,6 +84,24 @@ export const useEvmWallet = () => {
         }
     };
 
+    const signMessage = async (message: string): Promise<{ signature: string; address: string }> => {
+        if (!walletProvider) {
+            throw new Error("EVM wallet not initialized");
+        }
+        if (!evmAddress) {
+            throw new Error("Not connected to EVM wallet");
+        }
+
+        const ethersProvider = new ethers.BrowserProvider(walletProvider);
+        const signer = await ethersProvider.getSigner();
+        const signature = await signer.signMessage(message);
+        
+        return {
+            signature,
+            address: evmAddress
+        };
+    };
+
     const open = async (chain: AppKitNetwork) => {
         await openEvmModal();
         setChain(chain);
@@ -96,6 +114,7 @@ export const useEvmWallet = () => {
         isEvmLoading,
         isEvmConnected,
         handleEvmPay,
+        signMessage,
         disconnectEvm,
         open
     };
