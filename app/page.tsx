@@ -45,7 +45,7 @@ export default function Home() {
   } = useKeplrWallet();
 
   const {
-    suiAddress, connectSui, disconnectSui, isSuiConnected, suiBalance, handleSuiPay, isSuiLoading, isSuiWalletInstalled
+    suiAddress, connectSui, disconnectSui, isSuiConnected, suiBalance, handleSuiPay, isSuiLoading, isSuiWalletInstalled, handleSignMessage: signSuiMessage
   } = useSuiWallet();
 
   const {
@@ -146,7 +146,7 @@ export default function Home() {
       };
       case "sui": return {
         handlePay: () => handleSuiPay(beneficiaryAddress),
-        handleSignMessage: () => null,
+        handleSignMessage: () => signSuiMessage(message),
         isValidAddress: SUI_ADDRESS_REGEX.test(beneficiaryAddress),
         balance: suiBalance,
         address: suiAddress,
@@ -233,7 +233,8 @@ export default function Home() {
     signEvmMessage,
     signSolanaMessage,
     signKeplrMessage,
-    signNearMessage
+    signNearMessage,
+    signSuiMessage
   ]);
 
   const handleBeneficiaryAddressChange = (e: ChangeEvent<HTMLInputElement>) => {
