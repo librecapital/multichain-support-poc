@@ -9,15 +9,9 @@ export const supportedWallets = {
 };
 
 export const supportedChains = [
-    { id: 'ethereum', name: 'Ethereum', wallet: supportedWallets.metamask, assets: ["USDC"] },
-    { id: 'ethereum', name: 'Ethereum', wallet: supportedWallets.coinbase, assets: ["USDC"] },
-
-    { id: 'polygon', name: 'Polygon', wallet:supportedWallets.metamask, assets: ["USDC"] },
-    { id: 'polygon', name: 'Polygon', wallet: supportedWallets.coinbase , assets: ["USDC"] },
-
-    { id: 'avalanche', name: 'Avalanche', wallet: supportedWallets.metamask, assets: ["USDC"] },
-    { id: 'avalanche', name: 'Avalanche', wallet: supportedWallets.coinbase, assets: ["USDC"] },
-
+    { id: 'ethereum', name: 'Ethereum', wallet: [supportedWallets.metamask, supportedWallets.coinbase], assets: ["USDC"] },
+    { id: 'polygon', name: 'Polygon', wallet: [supportedWallets.metamask, supportedWallets.coinbase], assets: ["USDC"] },
+    { id: 'avalanche', name: 'Avalanche', wallet: [supportedWallets.metamask, supportedWallets.coinbase], assets: ["USDC"] },
     { id: 'mantra', name: 'Mantra', wallet: supportedWallets.keplr, assets: ["USDC"] },
     { id: 'solana', name: 'Solana', wallet: supportedWallets.phantom, assets: ["USDC"] },
     { id: 'injective', name: 'Injective', wallet: supportedWallets.keplr, assets: ["USDC"] },
