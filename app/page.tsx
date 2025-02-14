@@ -71,8 +71,8 @@ export default function Home() {
         handleConnect: () => open(mainnet),
         handleDisconnect: disconnectEvm,
         tokenName: "USDC",
-        isWalletInstalled: true, // we use wallet connect
-        walletInfo: supportedWallets.metamask,
+        isWalletInstalled: true,
+        walletInfo: [supportedWallets.metamask, supportedWallets.coinbase],
       };
       case "polygon": return {
         handlePay: () => ETH_ADDRESS_REGEX.test(beneficiaryAddress) && handleEvmPay(beneficiaryAddress as `0x${string}`),
@@ -85,8 +85,8 @@ export default function Home() {
         handleConnect: () => open(polygon),
         handleDisconnect: disconnectEvm,
         tokenName: "USDC",
-        isWalletInstalled: true, // we use wallet connect
-        walletInfo: supportedWallets.metamask,
+        isWalletInstalled: true,
+        walletInfo: [supportedWallets.metamask, supportedWallets.coinbase],
       };
       case "avalanche": return {
         handlePay: () => ETH_ADDRESS_REGEX.test(beneficiaryAddress) && handleEvmPay(beneficiaryAddress as `0x${string}`),
@@ -99,8 +99,8 @@ export default function Home() {
         handleConnect: () => open(avalancheFuji),
         handleDisconnect: disconnectEvm,
         tokenName: "USDC",
-        isWalletInstalled: true, // we use wallet connect
-        walletInfo: supportedWallets.metamask,
+        isWalletInstalled: true,
+        walletInfo: [supportedWallets.metamask, supportedWallets.coinbase],
       };
       case "solana": return {
         handlePay: () => handleSolanaPay(beneficiaryAddress),
@@ -392,8 +392,24 @@ export default function Home() {
 
               {!isInstalled && walletInfo &&
                 <div className="w-full bg-red-300 p-2 text-red-800">
-                  <p className="font-bold">Wallet not found!</p>
-                  <p className="font-mono underline"><a href={walletInfo.website} target="_blank" className="font-bold hover:text-blue-600">Click here to get {walletInfo.name}</a></p>
+                  <p className="font-bold">No supported wallet found!</p>
+                  <div className="space-y-1">
+                    {Array.isArray(walletInfo) ? (
+                      walletInfo.map((wallet) => (
+                        <p key={wallet.name} className="font-mono underline">
+                          <a href={wallet.website} target="_blank" className="font-bold hover:text-blue-600">
+                            Click here to get {wallet.name}
+                          </a>
+                        </p>
+                      ))
+                    ) : (
+                      <p className="font-mono underline">
+                        <a href={walletInfo.website} target="_blank" className="font-bold hover:text-blue-600">
+                          Click here to get {walletInfo.name}
+                        </a>
+                      </p>
+                    )}
+                  </div>
                 </div>
               }
 
