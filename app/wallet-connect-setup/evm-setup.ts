@@ -23,7 +23,7 @@ createAppKit({
     defaultNetwork: mainnet,
     allWallets: 'HIDE',
     enableWalletGuide: false,
-    excludeWalletIds: ["a797aa35c0fadbfc1a53e7f675162ed5226968b44a19ee3d24385c64d1d3c393", "6adb6082c909901b9e7189af3a4a0223102cd6f8d5c39e39f3d49acb92b578bb"],
+    includeWalletIds: ["c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96", "fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa"],
     features: {
         analytics: false,
         socials: false,
