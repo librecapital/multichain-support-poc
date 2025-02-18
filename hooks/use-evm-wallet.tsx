@@ -1,6 +1,7 @@
 import { ethers, formatUnits, InterfaceAbi, parseUnits } from "ethers";
 import { useEffect, useState } from "react";
 
+import { useAppKitWallet, Wallet } from "@reown/appkit-wallet-button/react";
 import { AppKitNetwork, mainnet } from "@reown/appkit/networks";
 import { useAppKit, useAppKitAccount, useAppKitNetwork, useAppKitProvider, useDisconnect } from '@reown/appkit/react';
 
@@ -48,6 +49,7 @@ export const useEvmWallet = () => {
     const { disconnect: disconnectEvm } = useDisconnect();
     const [isEvmLoading, setIsEvmLoading] = useState(false);
     const [chain, setChain] = useState<AppKitNetwork>(mainnet);
+    const { isReady, isPending, connect } = useAppKitWallet();
 
     useEffect(() => {
         if (!walletProvider) return;
@@ -102,8 +104,9 @@ export const useEvmWallet = () => {
         };
     };
 
-    const open = async (chain: AppKitNetwork) => {
-        await openEvmModal();
+    const open = async (chain: AppKitNetwork, wallet: Wallet) => {
+        //await openEvmModal();
+        await connect(wallet);
         setChain(chain);
     }
 

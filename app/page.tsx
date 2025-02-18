@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAptosWallet } from "@/hooks/use-aptos-wallet";
 
+import EvmModal from "@/components/ui/evm-modal";
 import { Input } from "@/components/ui/input";
 import WalletManagement from "@/components/ui/wallet-management";
 import { useEvmWallet } from '@/hooks/use-evm-wallet';
@@ -13,7 +14,7 @@ import { useKeplrWallet } from "@/hooks/use-keplr-wallet";
 import { useNearWallet } from "@/hooks/use-near-wallet";
 import { useSolanaWallet } from "@/hooks/use-solana-wallet";
 import { useSuiWallet } from "@/hooks/use-sui-wallet";
-import { avalancheFuji, mainnet, polygon } from '@reown/appkit/networks';
+import { AppKitNetwork, avalancheFuji, mainnet, polygon } from '@reown/appkit/networks';
 import { Link, Send, Unlink } from "lucide-react";
 import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { APTOS_ADDRESS_REGEX, ETH_ADDRESS_REGEX, INJECTIVE_ADDRESS_REGEX, MANTRA_ADDRESS_REGEX, NEAR_ADDRESS_REGEX, SOLANA_ADDRESS_REGEX, SUI_ADDRESS_REGEX, supportedChains, supportedWallets } from "./config";
@@ -28,6 +29,8 @@ export default function Home() {
   const [isInstalled, setIsInstalled] = useState(false);
   const [isSupportedChainsVisible, setIsSupportedChainsVisible] = useState<boolean>(false);
   const [isAddressSupported, setIsAddressSupported] = useState(true);
+  const [isEvmModalOpen, setIsEvmModalOpen] = useState<boolean>(false);
+  const [evmNetwork, setEvmNetwork] = useState<AppKitNetwork>(mainnet);
 
   const {
     isEvmLoading, evmBalance, evmAddress, isEvmConnected,
@@ -68,7 +71,10 @@ export default function Home() {
         address: evmAddress,
         isLoading: isEvmLoading,
         isConnected: isEvmConnected,
-        handleConnect: () => open(mainnet),
+        handleConnect: () => {
+          setEvmNetwork(mainnet);
+          setIsEvmModalOpen(true);
+        },
         handleDisconnect: disconnectEvm,
         tokenName: "USDC",
         isWalletInstalled: true,
@@ -82,7 +88,10 @@ export default function Home() {
         address: evmAddress,
         isLoading: isEvmLoading,
         isConnected: isEvmConnected,
-        handleConnect: () => open(polygon),
+        handleConnect: () => {
+          setEvmNetwork(polygon);
+          setIsEvmModalOpen(true);
+        },
         handleDisconnect: disconnectEvm,
         tokenName: "USDC",
         isWalletInstalled: true,
@@ -96,7 +105,10 @@ export default function Home() {
         address: evmAddress,
         isLoading: isEvmLoading,
         isConnected: isEvmConnected,
-        handleConnect: () => open(avalancheFuji),
+        handleConnect: () => {
+          setEvmNetwork(avalancheFuji);
+          setIsEvmModalOpen(true);
+        },
         handleDisconnect: disconnectEvm,
         tokenName: "USDC",
         isWalletInstalled: true,
@@ -204,7 +216,6 @@ export default function Home() {
     disconnectKeplr,
     keplrToken,
     handleEvmPay,
-    open,
     handleSolanaPay,
     handleKeplrPay,
     connectKeplr,
@@ -279,6 +290,11 @@ export default function Home() {
       <div className="container mx-auto px-4 py-8 w-full">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-4xl font-bold text-center mb-8">Libre Gateway PoC</h1>
+          <EvmModal
+            isOpen={isEvmModalOpen}
+            onOpenChange={setIsEvmModalOpen}
+            open={(wallet) => open(evmNetwork, wallet)}
+          />
           <WalletManagement
             selectedChain={selectedChain}
             currentAddress={address}
